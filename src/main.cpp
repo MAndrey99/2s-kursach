@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include "Player.h"
 
-#define WINDOW_SIZE_X 1000
-#define WINDOW_SIZE_Y 500
+#define WINDOW_SIZE_X 1200
+#define WINDOW_SIZE_Y 700
 
 using namespace std;
 
@@ -12,7 +12,7 @@ using namespace std;
 
 
 sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE_X, WINDOW_SIZE_Y), "Game", sf::Style::Close);
-Player player(sf::Vector2f(100, 100));
+Player player(sf::Vector2f(350, 600));
 
 
 void drow_scene() {
@@ -33,7 +33,7 @@ int main()
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) window.close();
 
-            if (event.type == sf::Event::JoystickMoved and event.joystickMove.position) {
+            if (event.type == sf::Event::JoystickMoved) {
                 controller_events.emplace_back(event);
             }
         }

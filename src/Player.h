@@ -26,6 +26,7 @@ class Player {
     int helth = 100;
     sf::Texture texture;
     sf::Sprite sprite;
+    sf::Vector2f direction = sf::Vector2f(1, 0); // направление взгляда (нормализованный вектор)
 
 public:
     Muvement muvement; // все передвижение сохраняется сдесь. Спрайт двигается после каждого апдейта.

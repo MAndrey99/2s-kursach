@@ -5,6 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 # set(SFML_STATIC_LIBRARIES TRUE)
 
-add_executable(Game src/main.cpp src/Player.cpp src/Player.h src/Muvement.cpp src/Muvement.h)
+add_executable(Game src/main.cpp src/Player.cpp src/Player.h src/Muvement.cpp src/Muvement.h src/Field.cpp src/Field.h)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC sfml-graphics sfml-window sfml-system)

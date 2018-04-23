@@ -1,14 +1,18 @@
 
 #include <iostream>
+#include <cmath>
 #include "Player.h"
 
 #define MIN_STIC_MOVEMENT_TO_MOVE 15.0f
 
 
 Player::Player(sf::Vector2f position): controller(this), muvement() {
-    texture.loadFromFile("res/hero_body.jpg");
-    sprite.setTexture(texture);
+    texture.loadFromFile("res/new_hero.png");
+    sprite.setTexture(texture, true);
     sprite.setPosition(position);
+    sprite.setScale(0.5, 0.5);
+    sprite.setColor(sf::Color::Yellow);
+    sprite.setOrigin(100, 124);
 }
 
 
@@ -16,12 +20,17 @@ void Player::update(std::list<sf::Event> &events) {
     controller.update(events);
     sprite.move(sf::Vector2f(sf::Vector2f(muvement).x * speed, sf::Vector2f(muvement).y * speed));
     muvement.length = 0; // больше двигаться не надо тк мы передвинулись.
+
+    float r = std::asin(direction.y); // угол, соответствующий вектору направления
+    if (direction.x < 0) r = M_PI - r;
+    sprite.setRotation(r / M_PI * 180);
+
+    std::cout << r / M_PI * 180 << '\n';
 }
 
 
 void Player::auto_drow(sf::RenderWindow &window) {
     window.draw(sprite);
-    std::cout << sprite.getPosition().x << ", " << sprite.getPosition().y << std::endl;
 }
 
 
@@ -47,6 +56,17 @@ void Player::Controller::update(std::list<sf::Event> &events) {
                     break;
             }
         }
+    }
+
+    // получаем вектор направления
+    if (abs(sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::U)) + abs(sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::V)) > MIN_STIC_MOVEMENT_TO_MOVE * 2) {
+        owner->direction.x = sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::U);
+        owner->direction.y = sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::V);
+
+        // нормализуем вектор направления
+        float len = std::sqrt(owner->direction.x * owner->direction.x + owner->direction.y * owner->direction.y);
+        owner->direction.x /= len;
+        owner->direction.y /= len;
     }
 
     if (abs(movement_vector.x) >= MIN_STIC_MOVEMENT_TO_MOVE)
