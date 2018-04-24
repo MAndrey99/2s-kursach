@@ -1,39 +1,36 @@
 #pragma once
 
 
-#include <list>
-#include <SFML/System.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/RenderTarget.hpp>
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
+#include "header.h"
 #include "Muvement.h"
 
 class Player {
     class Controller {
+        nam joysticID = 0;
         Player* owner;
-        sf::Clock clock;
+        Clock clock;
 
     public:
         Controller(Player*);
 
-        void update(std::list<sf::Event>&);
+        void update(list<Event>&);
     } controller;
 
-    float speed = 1.0f;
+    float speed = 2.0f;
     int helth = 100;
-    sf::Texture texture;
-    sf::Sprite sprite;
-    sf::Vector2f direction = sf::Vector2f(1, 0); // направление взгляда (нормализованный вектор)
+
+    Texture texture;
+    Sprite sprite;
+    CircleShape circleShape; // круг в котором находится сам персонаж. для взаимодействий.
+
+    Vector2f direction = Vector2f(1, 0); // направление взгляда (нормализованный вектор)
 
 public:
     Muvement muvement; // все передвижение сохраняется сдесь. Спрайт двигается после каждого апдейта.
 
-    Player(sf::Vector2f position);
+    Player(Vector2f position);
 
-    void update(std::list<sf::Event>&);
-    void auto_drow(sf::RenderWindow&);
+    void update(list<Event>&, list<Sprite> &walls);
+    void auto_drow();
 };
 

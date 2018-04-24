@@ -1,35 +1,51 @@
-
-#include <iostream>
-#include <cmath>
+#include "header.h"
 #include "Player.h"
 
 #define MIN_STIC_MOVEMENT_TO_MOVE 15.0f
 
 
-Player::Player(sf::Vector2f position): controller(this), muvement() {
+Player::Player(Vector2f position): controller(this), muvement() {
     texture.loadFromFile("res/new_hero.png");
-    sprite.setTexture(texture, true);
+    sprite.setTexture(texture);
+
+    sprite.setTextureRect(IntRect(17, 50, 200, 150));
     sprite.setPosition(position);
     sprite.setScale(0.5, 0.5);
-    sprite.setColor(sf::Color::Yellow);
-    sprite.setOrigin(100, 124);
+    sprite.setColor(Color::Yellow);
+    sprite.setOrigin(55, 72);
+
+    // кружок используется для обработки столкновений со стенами
+    circleShape.setRadius(36);
+    circleShape.setOrigin(18, 18);
+    circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
 }
 
 
-void Player::update(std::list<sf::Event> &events) {
+void Player::update(list<Event> &events, list<Sprite> &walls) {
+    // сохраняем то что есть сейчас, чтобы откатиться если движение невозможно
+    auto p = sprite.getPosition();
+
     controller.update(events);
-    sprite.move(sf::Vector2f(sf::Vector2f(muvement).x * speed, sf::Vector2f(muvement).y * speed));
+    sprite.move(Vector2f(Vector2f(muvement).x * speed, Vector2f(muvement).y * speed));
+    circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
     muvement.length = 0; // больше двигаться не надо тк мы передвинулись.
 
-    float r = std::asin(direction.y); // угол, соответствующий вектору направления
-    if (direction.x < 0) r = M_PI - r;
-    sprite.setRotation(r / M_PI * 180);
+    float new_r = asin(direction.y); // угол, соответствующий вектору направления
+    if (direction.x < 0) new_r = M_PI - new_r;
+    sprite.setRotation(new_r / M_PI * 180);
 
-    std::cout << r / M_PI * 180 << '\n';
+    for (Sprite& i : walls) { // проверяем нет ли пересичений со стенами
+        if (i.getGlobalBounds().intersects(circleShape.getGlobalBounds())) {
+            sprite.setPosition(p);
+            circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
+            return;
+        }
+    }
 }
 
 
-void Player::auto_drow(sf::RenderWindow &window) {
+void Player::auto_drow() {
+//    window.draw(circleShape);
     window.draw(sprite);
 }
 
@@ -37,20 +53,20 @@ void Player::auto_drow(sf::RenderWindow &window) {
 Player::Controller::Controller(Player *owner): owner(owner) {}
 
 
-void Player::Controller::update(std::list<sf::Event> &events) {
-    static sf::Vector2f last_movement_vector(0, 0);
-    sf::Vector2f movement_vector(0.0f, 0.0f);
-    std::pair update_last(false, false); // чтобы не забывать последний вектор движения если не двигались стики(по x и y)
+void Player::Controller::update(list<Event> &events) {
+    static Vector2f last_movement_vector(0, 0);
+    Vector2f movement_vector(0.0f, 0.0f);
+    pair update_last(false, false); // чтобы не забывать последний вектор движения если не двигались стики(по x и y)
 
     for (auto &i : events) {
-        if (i.type == sf::Event::JoystickMoved) {
+        if (i.type == Event::JoystickMoved) {
             switch (i.joystickMove.axis) {
-                case sf::Joystick::Axis::X:
+                case Joystick::Axis::X:
                     movement_vector.x = i.joystickMove.position;
                     update_last.first = true;
                     break;
 
-                case sf::Joystick::Axis::Y:
+                case Joystick::Axis::Y:
                     movement_vector.y = i.joystickMove.position;
                     update_last.second = true;
                     break;
@@ -59,28 +75,28 @@ void Player::Controller::update(std::list<sf::Event> &events) {
     }
 
     // получаем вектор направления
-    if (abs(sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::U)) + abs(sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::V)) > MIN_STIC_MOVEMENT_TO_MOVE * 2) {
-        owner->direction.x = sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::U);
-        owner->direction.y = sf::Joystick::getAxisPosition(0, sf::Joystick::Axis::V);
+    if (abs(Joystick::getAxisPosition(joysticID, Joystick::Axis::U)) + abs(Joystick::getAxisPosition(joysticID, Joystick::Axis::V)) > MIN_STIC_MOVEMENT_TO_MOVE * 2) {
+        owner->direction.x = Joystick::getAxisPosition(joysticID, Joystick::Axis::U);
+        owner->direction.y = Joystick::getAxisPosition(joysticID, Joystick::Axis::V);
 
         // нормализуем вектор направления
-        float len = std::sqrt(owner->direction.x * owner->direction.x + owner->direction.y * owner->direction.y);
+        float len = sqrt(owner->direction.x * owner->direction.x + owner->direction.y * owner->direction.y);
         owner->direction.x /= len;
         owner->direction.y /= len;
     }
 
     if (abs(movement_vector.x) >= MIN_STIC_MOVEMENT_TO_MOVE)
-        owner->muvement.add(sf::Vector2f(movement_vector.x * clock.getElapsedTime().asSeconds(), 0));
+        owner->muvement.add(Vector2f(movement_vector.x * clock.getElapsedTime().asSeconds(), 0));
     else if (movement_vector.x == 0 and abs(last_movement_vector.x) >= MIN_STIC_MOVEMENT_TO_MOVE)
-        owner->muvement.add(sf::Vector2f((movement_vector.x = last_movement_vector.x) * clock.getElapsedTime().asSeconds(), 0));
+        owner->muvement.add(Vector2f((movement_vector.x = last_movement_vector.x) * clock.getElapsedTime().asSeconds(), 0));
     else
         movement_vector.x = 0;
 
 
     if (abs(movement_vector.y) >= MIN_STIC_MOVEMENT_TO_MOVE)
-        owner->muvement.add(sf::Vector2f(0, movement_vector.y * clock.getElapsedTime().asSeconds()));
+        owner->muvement.add(Vector2f(0, movement_vector.y * clock.getElapsedTime().asSeconds()));
     else if (movement_vector.y == 0 and abs(last_movement_vector.y) >= MIN_STIC_MOVEMENT_TO_MOVE)
-        owner->muvement.add(sf::Vector2f(0, (movement_vector.y = last_movement_vector.y) * clock.getElapsedTime().asSeconds()));
+        owner->muvement.add(Vector2f(0, (movement_vector.y = last_movement_vector.y) * clock.getElapsedTime().asSeconds()));
     else
         movement_vector.y = 0;
 
