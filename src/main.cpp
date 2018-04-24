@@ -4,6 +4,7 @@
 
 RenderWindow window(VideoMode(WINDOW_SIZE_X, WINDOW_SIZE_Y), "Game", Style::Close);
 Field field;
+Clock sync_clock;
 
 
 int main()
@@ -11,10 +12,9 @@ int main()
     Event event{};
     list<Event> controller_events;
 
-    window.setFramerateLimit(30);
-
-
     while (window.isOpen()) {
+        sleep(milliseconds(1000 / FRAME_LIMIT) - sync_clock.getElapsedTime());
+        sync_clock.restart();
 
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed) window.close();

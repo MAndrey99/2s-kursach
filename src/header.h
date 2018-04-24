@@ -15,6 +15,7 @@
 
 #define WINDOW_SIZE_X 1500
 #define WINDOW_SIZE_Y 1000
+#define FRAME_LIMIT 30
 
 using namespace std;
 using namespace sf;

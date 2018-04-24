@@ -2,10 +2,12 @@
 
 
 Field::Field(): player(Vector2f(WINDOW_SIZE_X / 2, WINDOW_SIZE_Y /2)) {
+    PLATFORM_TEXTURE.loadFromFile("res/grass.jpg");
     WALL_TEXTURE.loadFromFile("res/wall_texture.png");
+
     Sprite tmp;
     tmp.setTexture(WALL_TEXTURE);
-    tmp.setScale(0.5, 0.5);
+    tmp.setScale(0.7, 0.7);
 
     float size_x = tmp.getGlobalBounds().width, size_y = tmp.getGlobalBounds().height;
 
@@ -19,15 +21,26 @@ Field::Field(): player(Vector2f(WINDOW_SIZE_X / 2, WINDOW_SIZE_Y /2)) {
 
     for (int i = 0; i * size_x < WINDOW_SIZE_X; i++) {
         tmp.setPosition(i *size_x, 0);
-        walls.emplace_back(tmp); // добавляем слева
+        walls.emplace_back(tmp); // добавляем сверху
 
         tmp.setPosition(i * size_x, WINDOW_SIZE_Y - size_y);
-        walls.emplace_back(tmp); // добавляем справа
+        walls.emplace_back(tmp); // добавляем снизу
+    }
+
+    tmp.setTexture(PLATFORM_TEXTURE);
+    size_x = tmp.getGlobalBounds().width;
+    size_y = tmp.getGlobalBounds().height;
+
+    for (int i = 0; i * size_y < WINDOW_SIZE_Y; i++) {
+        for (int j = 0; j * size_x < WINDOW_SIZE_X; j++) {
+            tmp.setPosition(j * size_x, i * size_y);
+            platform.emplace_back(tmp);
+        }
     }
 }
 
 void Field::drow_scene() {
-    player.auto_drow();
-
+    for (Sprite& i : platform) window.draw(i); // ресуем платформу
     for (Sprite& i : walls) window.draw(i); // ресуем стены
+    player.auto_drow();
 }
