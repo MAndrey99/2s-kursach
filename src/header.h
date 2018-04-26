@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <unistd.h>
 #include <list>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -23,4 +22,8 @@ using namespace sf;
 typedef unsigned char nam;
 
 extern RenderWindow window;
+
+extern Texture WALL_TEXTURE;
+extern Texture PLATFORM_TEXTURE;
+extern Texture BULLET_TEXTURE;
 

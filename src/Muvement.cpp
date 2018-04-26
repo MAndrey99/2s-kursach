@@ -1,8 +1,13 @@
 #include <cmath>
 #include "Muvement.h"
 
-Muvement::Muvement(sf::Vector2f arg): length((float)sqrt(arg.x*arg.x + arg.y*arg.y)),
-                                      direction(arg.x / length, arg.y / length) {}
+Muvement::Muvement(sf::Vector2f arg): length((float)sqrt(arg.x*arg.x + arg.y*arg.y)) {
+    if (length > 0) {
+        direction = Vector2f(arg.x / length, arg.y / length);
+    } else {
+        direction = Vector2f(0, 1);
+    }
+}
 
 Muvement::Muvement(): length(0), direction() {}
 
@@ -19,13 +24,20 @@ sf::Vector2f Muvement::v_sum(sf::Vector2f other) {
     return other;
 }
 
-Muvement::operator sf::Vector2f() {
+Muvement::operator Vector2f() {
     return sf::Vector2f(direction.x * length, direction.y * length);
 }
 
 void Muvement::add(sf::Vector2f arg) {
     arg = v_sum(arg);
     length = (float)sqrt(arg.x*arg.x + arg.y*arg.y); // длинна нового вектора
-    direction.x = arg.x / length;
-    direction.y = arg.y / length;
+
+    if (length != 0) {
+        direction.x = arg.x / length;
+        direction.y = arg.y / length;
+    }
+}
+
+Vector2f Muvement::multiplyed(float scale) {
+    return sf::Vector2f(direction.x * length * scale, direction.y * length * scale);
 }

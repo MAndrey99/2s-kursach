@@ -1,21 +1,21 @@
 #pragma once
 
-
-#include <SFML/System.hpp>
+#include "header.h"
 
 class Muvement {
-    sf::Vector2f direction; // нормолизованый вектор движения. те направление.
+    Vector2f direction; // нормолизованый вектор движения. те направление.
 
 public:
     float length; // длинна вектора движения
 
-    explicit Muvement(sf::Vector2f);
+    explicit Muvement(Vector2f);
     Muvement();
 
-    sf::Vector2f v_sum(sf::Vector2f other); // складывается с другим вектором
-    void set_direction(sf::Vector2f);
-    void add(sf::Vector2f);
-    sf::Vector2f get_direction() { return direction; }
+    Vector2f v_sum(Vector2f other); // складывается с другим вектором
+    void set_direction(Vector2f);
+    void add(Vector2f);
+    Vector2f get_direction() { return direction; }
+    Vector2f multiplyed(float scale); // получение вектора движения, умноженного на число
 
-    operator sf::Vector2f();
+    operator Vector2f();
 };
