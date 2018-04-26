@@ -8,6 +8,6 @@ Bullet::Bullet(Vector2f position, Muvement muvement, int damage): damage(damage)
 
 
 void Bullet::update() {
-    sprite.move(muvement.multiplyed(clock.getElapsedTime().asMilliseconds()));
+    sprite.move(muvement.multiplyed(clock.getElapsedTime().asMilliseconds() * BULLET_SPEED));
     clock.restart();
 }

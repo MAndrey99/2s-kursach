@@ -5,9 +5,7 @@
 
 
 Player::Player(Vector2f position): controller(this), muvement() {
-    texture.loadFromFile("res/new_hero.png");
-    sprite.setTexture(texture);
-
+    sprite.setTexture(HERO_TEXTURE);
     sprite.setTextureRect(IntRect(17, 50, 200, 150));
     sprite.setPosition(position);
     sprite.setScale(0.5, 0.5);
@@ -99,7 +97,13 @@ void Player::Controller::update(list<Event> &events, vector<Bullet> &bullets) {
 
     for (Event& it : events) {
         if (it.joystickButton.button == 5) {
-            Bullet new_bullet(owner->get_position(), Muvement(owner->direction), 10);
+            Vector2f t(-owner->direction.y / owner->direction.x, 1);
+            if (owner->direction.x * t.y - owner->direction.y * t.x < 0)
+                t = Vector2f(-t.x, -t.y);
+            t = Muvement(t).get_direction(); // t и owner->direction - ортонормированный базис. t поможет сдвинуть пулю к дулу
+
+            Bullet new_bullet(Vector2f(owner->get_position().x + t.x*15, owner->get_position().y + t.y*15), Muvement(owner->direction), 10);
+
             owner->shoot(new_bullet);
             bullets.emplace_back(new_bullet);
         }

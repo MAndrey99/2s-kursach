@@ -9,12 +9,14 @@ Clock sync_clock;
 Texture WALL_TEXTURE;
 Texture PLATFORM_TEXTURE;
 Texture BULLET_TEXTURE;
+Texture HERO_TEXTURE;
 
 
-void load_texures() {
+void load_texures_and_sounds() {
     BULLET_TEXTURE.loadFromFile("res/bullet.png"); // загружаем текстуру для пуль
     PLATFORM_TEXTURE.loadFromFile("res/grass.jpg"); // загружаем основную текстуру платформы
     WALL_TEXTURE.loadFromFile("res/wall_texture.png"); // загружаем текатуру стен
+    HERO_TEXTURE.loadFromFile("res/new_hero.png"); // загружаем текстуру героя
 
     PLATFORM_TEXTURE.setRepeated(true); // чтобы делать спрайты длиннее текстур
     WALL_TEXTURE.setRepeated(true);
@@ -23,7 +25,7 @@ void load_texures() {
 
 int main()
 {
-    load_texures();
+    load_texures_and_sounds();
     field.init_walls();
 
     Event event{};

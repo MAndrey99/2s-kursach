@@ -20,7 +20,6 @@ class Player {
     float speed = 3.0f;
     float helth = 100;
 
-    Texture texture;
     Sprite sprite;
     CircleShape circleShape; // круг в котором находится сам персонаж. для взаимодействий
 

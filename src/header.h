@@ -14,7 +14,8 @@
 
 #define WINDOW_SIZE_X 1500
 #define WINDOW_SIZE_Y 1000
-#define FRAME_LIMIT 30
+#define FRAME_LIMIT 60
+#define BULLET_SPEED 2
 
 using namespace std;
 using namespace sf;
@@ -26,4 +27,4 @@ extern RenderWindow window;
 extern Texture WALL_TEXTURE;
 extern Texture PLATFORM_TEXTURE;
 extern Texture BULLET_TEXTURE;
-
+extern Texture HERO_TEXTURE;
