@@ -13,7 +13,7 @@ Muvement::Muvement(): length(0), direction() {}
 
 
 void Muvement::set_direction(sf::Vector2f new_direction) {
-    float n_length = (float)sqrt(new_direction.x*new_direction.x + new_direction.y*new_direction.y); // длинна вектора new_direction
+    float n_length = (float)sqrt(squ(new_direction.x) + squ(new_direction.y)); // длинна вектора new_direction
     direction.x = new_direction.x / n_length;
     direction.y = new_direction.y / n_length;
 }

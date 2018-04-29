@@ -37,7 +37,7 @@ void Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &e
     circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
     muvement.length = 0; // больше двигаться не надо тк мы передвинулись.
 
-    float new_r = asin(direction.y); // угол, соответствующий вектору направления
+    float new_r = asin(direction.y); // угол в радианах, соответствующий вектору направления
     if (direction.x < 0) new_r = M_PI - new_r;
     sprite.setRotation(new_r / M_PI * 180);
 
@@ -80,9 +80,9 @@ void Player::Controller::update(list<Event> &events, vector<Bullet> &bullets) {
     owner->muvement.add(Vector2f(movement_vector.x * clock.getElapsedTime().asSeconds(), movement_vector.y * clock.getElapsedTime().asSeconds()));
 
     // получаем вектор направления
-    if (abs(Joystick::getAxisPosition(joysticID, Joystick::Axis::U)) + abs(Joystick::getAxisPosition(joysticID, Joystick::Axis::V)) > MIN_STIC_MOVEMENT_TO_MOVE * 2) {
+    if (squ(Joystick::getAxisPosition(joysticID, Joystick::Axis::U)) + squ(Joystick::getAxisPosition(joysticID, OS == "WINDOWS" ? Joystick::Axis::R : Joystick::Axis::V)) > squ(MIN_STIC_MOVEMENT_TO_MOVE)) {
         owner->direction.x = Joystick::getAxisPosition(joysticID, Joystick::Axis::U);
-        owner->direction.y = Joystick::getAxisPosition(joysticID, Joystick::Axis::V);
+        owner->direction.y = Joystick::getAxisPosition(joysticID, OS == "WINDOWS" ? Joystick::Axis::R : Joystick::Axis::V);
 
         // нормализуем вектор направления
         float len = sqrt(owner->direction.x * owner->direction.x + owner->direction.y * owner->direction.y);

@@ -11,6 +11,9 @@ Texture PLATFORM_TEXTURE;
 Texture BULLET_TEXTURE;
 Texture HERO_TEXTURE;
 
+SoundBuffer SHOOT_SOUND;
+
+list<Sound> background_temp_sounds;
 
 void load_texures_and_sounds() {
     BULLET_TEXTURE.loadFromFile("res/bullet.png"); // загружаем текстуру для пуль
@@ -20,6 +23,16 @@ void load_texures_and_sounds() {
 
     PLATFORM_TEXTURE.setRepeated(true); // чтобы делать спрайты длиннее текстур
     WALL_TEXTURE.setRepeated(true);
+
+    SHOOT_SOUND.loadFromFile("res/shoot.wav"); // загружаем музыку
+}
+
+
+void sound_control() {
+    // удаляем звуки, которые уже не звучат
+    for (auto it = background_temp_sounds.begin(); it != background_temp_sounds.end(); ++it)
+        if (it->getStatus() != it->Playing)
+            background_temp_sounds.erase(it);
 }
 
 
@@ -43,13 +56,13 @@ int main()
         }
 
         field.update(controller_events);
+        sound_control();
         controller_events.clear();
 
         field.draw_scene();
         window.display();
         window.clear(Color::Cyan);
     }
-
 
     return 0;
 }

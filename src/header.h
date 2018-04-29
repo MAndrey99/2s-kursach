@@ -10,7 +10,10 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Audio.hpp>
 #include <cmath>
+
+#include "config.h"
 
 #define WINDOW_SIZE_X 1500
 #define WINDOW_SIZE_Y 1000
@@ -28,3 +31,9 @@ extern Texture WALL_TEXTURE;
 extern Texture PLATFORM_TEXTURE;
 extern Texture BULLET_TEXTURE;
 extern Texture HERO_TEXTURE;
+
+extern SoundBuffer SHOOT_SOUND;
+
+extern list<Sound> background_temp_sounds;
+
+#define squ(a) a*a
