@@ -4,12 +4,12 @@
 #define MIN_STIC_MOVEMENT_TO_MOVE 15.0f
 
 
-Player::Player(Vector2f position): controller(this), muvement() {
+Player::Player(Vector2f position, Color color, nam joysticID): controller(this, joysticID), muvement() {
     sprite.setTexture(HERO_TEXTURE);
     sprite.setTextureRect(IntRect(17, 50, 200, 150));
     sprite.setPosition(position);
     sprite.setScale(0.5, 0.5);
-    sprite.setColor(Color::Yellow);
+    sprite.setColor(color);
     sprite.setOrigin(57, 72);
 
     // кружок используется для обработки столкновений со стенами
@@ -67,7 +67,7 @@ void Player::shoot(Bullet &bullet) {
 }
 
 
-Player::Controller::Controller(Player *owner): owner(owner) {}
+Player::Controller::Controller(Player *owner, nam joysticID): owner(owner), joysticID(joysticID) {}
 
 
 void Player::Controller::update(list<Event> &events, vector<Bullet> &bullets) {
@@ -96,7 +96,7 @@ void Player::Controller::update(list<Event> &events, vector<Bullet> &bullets) {
     // далее обработка клавишь
 
     for (Event& it : events) {
-        if (it.joystickButton.button == 5) {
+        if (it.joystickButton.button == 5 and it.joystickButton.joystickId == joysticID) {
             Vector2f t(-owner->direction.y / owner->direction.x, 1);
             if (owner->direction.x * t.y - owner->direction.y * t.x < 0)
                 t = Vector2f(-t.x, -t.y);

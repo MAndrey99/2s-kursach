@@ -1,14 +1,17 @@
 #include "Field.h"
 
 
-Field::Field(): player(Vector2f(WINDOW_SIZE_X / 2, WINDOW_SIZE_Y /2)) {}
+Field::Field(): player1(Vector2f(WINDOW_SIZE_X / 10, WINDOW_SIZE_Y / 10), Color::Yellow, 0),
+                player2(Vector2f(WINDOW_SIZE_X - WINDOW_SIZE_X / 10, WINDOW_SIZE_Y - WINDOW_SIZE_Y / 10), Color::Red, 1)
+                {}
 
 
 void Field::draw_scene() {
     for (Sprite& i : platform) window.draw(i); // рисуем платформу
     for (Bullet& i : bullets) window.draw(i.sprite); // рисуем пули
     for (Sprite& i : walls) window.draw(i); // рисуем стены
-    player.auto_drow(); // рисуем игрока
+    player1.auto_drow(); // рисуем игроков
+    player2.auto_drow();
 }
 
 
@@ -21,7 +24,8 @@ void Field::update(list<Event> &events) {
                 bullets.erase(bullets.begin() + i); // удаляем пулю тк она в стене
     }
 
-    player.update(walls, bullets, events);
+    player1.update(walls, bullets, events);
+    player2.update(walls, bullets, events);
 }
 
 void Field::init_walls() {

@@ -12,7 +12,7 @@ class Player {
         Clock clock;
 
     public:
-        Controller(Player*);
+        Controller(Player*, nam joysticID);
 
         void update(list<Event> &events, vector<Bullet> &bullets);
     } controller;
@@ -28,7 +28,7 @@ class Player {
 public:
     Muvement muvement; // все передвижение сохраняется сдесь. Спрайт двигается после каждого апдейта
 
-    Player(Vector2f position);
+    Player(Vector2f position, Color color, nam joysticID);
 
     bool is_alive() { return helth > 0; }
     Vector2f get_position() { return sprite.getPosition(); }
