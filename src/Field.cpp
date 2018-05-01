@@ -15,7 +15,7 @@ void Field::draw_scene() {
 }
 
 
-void Field::update(list<Event> &events) {
+Winner Field::update(list<Event> &events) {
     for (int i = 0; i < bullets.size(); i++) {
         bullets[i].update(); // двигаем пулю
 
@@ -24,8 +24,9 @@ void Field::update(list<Event> &events) {
                 bullets.erase(bullets.begin() + i); // удаляем пулю тк она в стене
     }
 
-    player1.update(walls, bullets, events);
-    player2.update(walls, bullets, events);
+    if (!player1.update(walls, bullets, events)) return Winner::PLAYER1;
+    if (!player2.update(walls, bullets, events)) return Winner::PLAYER2;
+    return Winner::NO_ONE;
 }
 
 void Field::init_walls() {

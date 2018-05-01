@@ -17,8 +17,9 @@
 
 #define WINDOW_SIZE_X 1500
 #define WINDOW_SIZE_Y 1000
-#define FRAME_LIMIT 60
+#define FRAME_LIMIT 58
 #define BULLET_SPEED 2
+#define DRAW_FPS true
 
 using namespace std;
 using namespace sf;
@@ -33,6 +34,8 @@ extern Texture BULLET_TEXTURE;
 extern Texture HERO_TEXTURE;
 
 extern SoundBuffer SHOOT_SOUND;
+
+extern Font FD_FONT;
 
 extern list<Sound> background_temp_sounds;
 

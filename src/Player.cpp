@@ -24,7 +24,7 @@ Player::Player(Vector2f position, Color color, nam joysticID): controller(this, 
 }
 
 
-void Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events) {
+bool Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events) {
     for (int i = 0; i < bullets.size(); i++) {
         if (circleShape.getGlobalBounds().intersects(bullets[i].sprite.getGlobalBounds())) {
             if (helth > 0)
@@ -33,7 +33,7 @@ void Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &e
         }
     }
 
-    if (helth <= 0) return; // не обрабатываем движения мёртвого игрока
+    if (helth <= 0) return false; // не обрабатываем движения мёртвого игрока
 
     // сохраняем то что есть сейчас, чтобы откатиться если движение невозможно
     auto p = sprite.getPosition();
@@ -51,9 +51,11 @@ void Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &e
         if (i.getGlobalBounds().intersects(circleShape.getGlobalBounds())) {
             sprite.setPosition(p);
             circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
-            return;
+            return true;
         }
     }
+
+    return true;
 }
 
 

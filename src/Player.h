@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "header.h"
 #include "Muvement.h"
 #include "Bullet.h"
@@ -36,7 +35,7 @@ public:
 
     bool is_alive() { return helth > 0; }
     Vector2f get_position() { return sprite.getPosition(); }
-    void update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events);
+    bool update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events); // false -> персонаж мёртв
     void auto_drow();
     bool intersects(const Rect<float> &rectangle); // пересикается ли персонаж с другим обьектом
     void shoot(Bullet &bullet); // сделать выстрел

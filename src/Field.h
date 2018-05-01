@@ -3,6 +3,7 @@
 #include "header.h"
 #include "Player.h"
 #include "Bullet.h"
+#include "enums.h"
 
 // Отвечает за расположение обьектов на поле и их взаимодействие.
 class Field {
@@ -17,5 +18,5 @@ public:
 
     void init_walls();
     void draw_scene(); // рисует все обьекты на поле
-    void update(list<Event> &events); // обновляет позиции всех обьектов на карте(например пуль) кроме персоонажей
+    Winner update(list<Event> &events); // обновляет позиции всех обьектов на карте. false -> конец игры
 };

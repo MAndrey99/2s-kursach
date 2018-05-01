@@ -1,19 +1,11 @@
 #include "header.h"
+#include "init.h"
 #include "Player.h"
 #include "Field.h"
 
-RenderWindow window(VideoMode(WINDOW_SIZE_X, WINDOW_SIZE_Y), "Game", Style::Close);
 Field field;
 Clock sync_clock;
 
-Texture WALL_TEXTURE;
-Texture PLATFORM_TEXTURE;
-Texture BULLET_TEXTURE;
-Texture HERO_TEXTURE;
-
-SoundBuffer SHOOT_SOUND;
-
-list<Sound> background_temp_sounds;
 
 void load_texures_and_sounds() {
     BULLET_TEXTURE.loadFromFile("res/bullet.png"); // загружаем текстуру для пуль
@@ -25,6 +17,8 @@ void load_texures_and_sounds() {
     WALL_TEXTURE.setRepeated(true);
 
     SHOOT_SOUND.loadFromFile("res/shoot.wav"); // загружаем музыку
+
+    FD_FONT.loadFromFile("res/FD.ttf"); // загружаем шрифты
 }
 
 
@@ -36,6 +30,46 @@ void sound_control() {
 }
 
 
+void draw_fps() {
+    static Clock clock;
+    static int pictures_count;
+    static Text fps_text("FPS: 00", FD_FONT, 20);
+
+    if (clock.getElapsedTime() >= seconds(1)) {
+        fps_text.setString(string("FPS: ") + to_string(pictures_count));
+        pictures_count = 0;
+        clock.restart();
+    } else ++pictures_count;
+
+    window.draw(fps_text);
+}
+
+
+void show_winner(Winner winner) {
+    Text text(string(winner == Winner::PLAYER1 ? "Player1" : "Player2") + " won", FD_FONT, 50);
+    Event event;
+
+    text.setPosition(WINDOW_SIZE_X / 3, WINDOW_SIZE_Y / 3);
+    text.setFillColor(winner == Winner::PLAYER1 ? Color::Yellow : Color::Red);
+
+    window.clear(Color::Green);
+    window.draw(text);
+    window.display();
+
+    while (true) {
+        sleep(milliseconds(25));
+
+        while (window.pollEvent(event)) {
+            if (event.type == Event::Closed) window.close();
+
+            if (event.type == event.JoystickButtonPressed) {
+                if (event.joystickButton.button == 0) return;
+            }
+        }
+    }
+}
+
+
 int main()
 {
     load_texures_and_sounds();
@@ -43,6 +77,7 @@ int main()
 
     Event event{};
     list<Event> controller_events;
+    Winner temp_winner;
 
     while (window.isOpen()) {
         sleep(milliseconds(1000 / FRAME_LIMIT) - sync_clock.getElapsedTime());
@@ -55,11 +90,30 @@ int main()
                 controller_events.emplace_back(event);
         }
 
-        field.update(controller_events);
+        temp_winner = field.update(controller_events);
         sound_control();
         controller_events.clear();
 
+        if (temp_winner != Winner::NO_ONE) {
+            // в течении секунды поле будет изменятся
+            Clock tmp;
+            while (tmp.getElapsedTime() < seconds(1)) {
+                sleep(milliseconds(1000 / FRAME_LIMIT) - sync_clock.getElapsedTime());
+                sync_clock.restart();
+                field.update(controller_events);
+                field.draw_scene();
+                if constexpr (DRAW_FPS) draw_fps();
+                window.display();
+                window.clear(Color::Cyan);
+            }
+
+            show_winner(temp_winner);
+            window.close();
+            return 0;
+        }
+
         field.draw_scene();
+        if constexpr (DRAW_FPS) draw_fps();
         window.display();
         window.clear(Color::Cyan);
     }
