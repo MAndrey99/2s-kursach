@@ -4,8 +4,7 @@
 #define MIN_STIC_MOVEMENT_TO_MOVE 15.0f
 
 
-Player::Player(Vector2f position, Color color, nam joysticID): controller(this, joysticID), muvement() {
-    sprite.setTexture(HERO_TEXTURE);
+Player::Player(Vector2f position, Color color, nam joysticID): sprite(HERO_TEXTURE), controller(this, joysticID), muvement() {
     sprite.setTextureRect(IntRect(17, 50, 200, 150));
     sprite.setPosition(position);
     sprite.setScale(0.5, 0.5);
@@ -82,6 +81,15 @@ void Player::shoot(Bullet &bullet) {
 }
 
 
+void Player::to_position(Vector2f position) {
+    helth = 100.0f;
+    sprite.setPosition(position);
+    circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
+    sprite.setRotation(0);
+    direction = Vector2f(1, 0);
+}
+
+
 Player::Controller::Controller(Player *owner, nam joysticID): owner(owner), joysticID(joysticID) {}
 
 
@@ -109,7 +117,6 @@ void Player::Controller::update(list<Event> &events, vector<Bullet> &bullets) {
 
 
     // далее обработка клавишь
-
     for (Event& it : events) {
         if (it.joystickButton.button == 5 and it.joystickButton.joystickId == joysticID) {
             Vector2f t(-owner->direction.y / owner->direction.x, 1);

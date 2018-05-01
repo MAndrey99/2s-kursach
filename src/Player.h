@@ -39,5 +39,6 @@ public:
     void auto_drow();
     bool intersects(const Rect<float> &rectangle); // пересикается ли персонаж с другим обьектом
     void shoot(Bullet &bullet); // сделать выстрел
+    void to_position(Vector2f position);
 };
 

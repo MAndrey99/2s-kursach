@@ -5,6 +5,7 @@
 
 Field field;
 Clock sync_clock;
+Event event{};
 
 
 void load_texures_and_sounds() {
@@ -16,18 +17,22 @@ void load_texures_and_sounds() {
     PLATFORM_TEXTURE.setRepeated(true); // чтобы делать спрайты длиннее текстур
     WALL_TEXTURE.setRepeated(true);
 
+#if ENABLE_SOUNDS
     SHOOT_SOUND.loadFromFile("res/shoot.wav"); // загружаем музыку
+#endif
 
     FD_FONT.loadFromFile("res/FD.ttf"); // загружаем шрифты
 }
 
 
+#if ENABLE_SOUNDS
 void sound_control() {
     // удаляем звуки, которые уже не звучат
     for (auto it = background_temp_sounds.begin(); it != background_temp_sounds.end(); ++it)
         if (it->getStatus() != it->Playing)
             background_temp_sounds.erase(it);
 }
+#endif
 
 
 void draw_fps() {
@@ -45,9 +50,8 @@ void draw_fps() {
 }
 
 
-void show_winner(Winner winner) {
+bool show_winner(Winner winner) {
     Text text(string(winner == Winner::PLAYER1 ? "Player1" : "Player2") + " won", FD_FONT, 50);
-    Event event;
 
     text.setPosition(WINDOW_SIZE_X / 3, WINDOW_SIZE_Y / 3);
     text.setFillColor(winner == Winner::PLAYER1 ? Color::Yellow : Color::Red);
@@ -60,10 +64,13 @@ void show_winner(Winner winner) {
         sleep(milliseconds(25));
 
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) window.close();
+            if (event.type == Event::Closed) {
+                window.close();
+                return false;
+            }
 
             if (event.type == event.JoystickButtonPressed) {
-                if (event.joystickButton.button == 0) return;
+                if (event.joystickButton.button == 0) return true;
             }
         }
     }
@@ -75,7 +82,6 @@ int main()
     load_texures_and_sounds();
     field.init_walls();
 
-    Event event{};
     list<Event> controller_events;
     Winner temp_winner;
 
@@ -91,7 +97,11 @@ int main()
         }
 
         temp_winner = field.update(controller_events);
+
+#if ENABLE_SOUNDS
         sound_control();
+#endif
+
         controller_events.clear();
 
         if (temp_winner != Winner::NO_ONE) {
@@ -107,9 +117,13 @@ int main()
                 window.clear(Color::Cyan);
             }
 
-            show_winner(temp_winner);
-            window.close();
-            return 0;
+            if (!show_winner(temp_winner)) {
+                window.close();
+                return 0;
+            }
+
+            field.init_walls();
+            field.players_to_position();
         }
 
         field.draw_scene();

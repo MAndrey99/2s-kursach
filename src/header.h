@@ -20,6 +20,7 @@
 #define FRAME_LIMIT 58
 #define BULLET_SPEED 2
 #define DRAW_FPS true
+#define ENABLE_SOUNDS true
 
 using namespace std;
 using namespace sf;
@@ -33,7 +34,9 @@ extern Texture PLATFORM_TEXTURE;
 extern Texture BULLET_TEXTURE;
 extern Texture HERO_TEXTURE;
 
+#if ENABLE_SOUNDS
 extern SoundBuffer SHOOT_SOUND;
+#endif
 
 extern Font FD_FONT;
 

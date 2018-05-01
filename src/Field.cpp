@@ -24,12 +24,17 @@ Winner Field::update(list<Event> &events) {
                 bullets.erase(bullets.begin() + i); // удаляем пулю тк она в стене
     }
 
-    if (!player1.update(walls, bullets, events)) return Winner::PLAYER1;
-    if (!player2.update(walls, bullets, events)) return Winner::PLAYER2;
+    if (!player1.update(walls, bullets, events)) return Winner::PLAYER2;
+    if (!player2.update(walls, bullets, events)) return Winner::PLAYER1;
     return Winner::NO_ONE;
 }
 
+
 void Field::init_walls() {
+    walls.clear();
+    platform.clear();
+    bullets.clear();
+
     Sprite tmp;
     tmp.setTexture(WALL_TEXTURE);
     tmp.setScale(0.7, 0.7);
@@ -53,4 +58,10 @@ void Field::init_walls() {
     tmp.setTextureRect(IntRect(0, 0, WINDOW_SIZE_X*2, WINDOW_SIZE_Y*2));
     tmp.setPosition(0, 0);
     platform.emplace_back(tmp);
+}
+
+
+void Field::players_to_position() {
+    player1.to_position(Vector2f(WINDOW_SIZE_X / 10, WINDOW_SIZE_Y / 10));
+    player2.to_position(Vector2f(WINDOW_SIZE_X - WINDOW_SIZE_X / 10, WINDOW_SIZE_Y - WINDOW_SIZE_Y / 10));
 }

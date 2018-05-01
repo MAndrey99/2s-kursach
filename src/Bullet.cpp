@@ -5,9 +5,10 @@ Bullet::Bullet(Vector2f position, Muvement muvement, int damage): damage(damage)
     sprite.setTexture(BULLET_TEXTURE);
     sprite.setPosition(position);
 
-    Sound sound(SHOOT_SOUND);
-    background_temp_sounds.emplace_back(sound);
+#if ENABLE_SOUNDS
+    background_temp_sounds.emplace_back(Sound(SHOOT_SOUND));
     background_temp_sounds.back().play();
+#endif
 }
 
 

@@ -7,7 +7,9 @@ Texture PLATFORM_TEXTURE;
 Texture BULLET_TEXTURE;
 Texture HERO_TEXTURE;
 
+#if ENABLE_SOUNDS
 SoundBuffer SHOOT_SOUND;
+#endif
 
 Font FD_FONT;
 
