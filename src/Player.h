@@ -5,6 +5,9 @@
 #include "Muvement.h"
 #include "Bullet.h"
 
+#define HEALTH_LINE_X_LENGTH 100
+#define HEALTH_LINE_Y_LENGTH 5
+
 class Player {
     class Controller {
         nam joysticID = 0;
@@ -22,6 +25,7 @@ class Player {
 
     Sprite sprite;
     CircleShape circleShape; // круг в котором находится сам персонаж. для взаимодействий
+    RectangleShape health_scale_line; // линия здоровья
 
     Vector2f direction = Vector2f(1, 0); // направление взгляда (нормализованный вектор)
 

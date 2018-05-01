@@ -12,17 +12,23 @@ Player::Player(Vector2f position, Color color, nam joysticID): controller(this, 
     sprite.setColor(color);
     sprite.setOrigin(57, 72);
 
+    health_scale_line.setPosition(sprite.getGlobalBounds().left + 10,
+                                    sprite.getGlobalBounds().top + 110);
+    health_scale_line.setSize(Vector2f(HEALTH_LINE_X_LENGTH, HEALTH_LINE_Y_LENGTH));
+    health_scale_line.setFillColor(Color::Red);
+
     // кружок используется для обработки столкновений со стенами
-    circleShape.setRadius(36);
-    circleShape.setOrigin(18, 18);
+    circleShape.setRadius(30);
+    circleShape.setOrigin(15, 15);
     circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
 }
 
 
 void Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events) {
     for (int i = 0; i < bullets.size(); i++) {
-        if (intersects(bullets[i].sprite.getGlobalBounds())) {
-            helth -= bullets[i].damage;
+        if (circleShape.getGlobalBounds().intersects(bullets[i].sprite.getGlobalBounds())) {
+            if (helth > 0)
+                helth -= bullets[i].damage;
             bullets.erase(bullets.begin() + i); // удаляем пулю
         }
     }
@@ -52,11 +58,18 @@ void Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &e
 
 
 void Player::auto_drow() {
+//    window.draw(circleShape);
     window.draw(sprite);
+
+    health_scale_line.setPosition(sprite.getGlobalBounds().left + 10,
+                                  sprite.getGlobalBounds().top + 110);
+    health_scale_line.setSize(Vector2f(HEALTH_LINE_X_LENGTH * helth / 100, HEALTH_LINE_Y_LENGTH));
+
+    window.draw(health_scale_line);
 }
 
 
-bool Player::intersects(const Rect<float> &rectangle) {
+bool Player::intersects(const FloatRect &rectangle) {
     return circleShape.getGlobalBounds().intersects(rectangle);
 }
 
