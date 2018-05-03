@@ -4,29 +4,19 @@
 #include "Field.h"
 
 Field field;
-Clock sync_clock;
 Event event;
 
-
-void load_texures_and_sounds() {
-    BULLET_TEXTURE.loadFromFile("res/bullet.png"); // загружаем текстуру для пуль
-    PLATFORM_TEXTURE.loadFromFile("res/grass.jpg"); // загружаем основную текстуру платформы
-    WALL_TEXTURE.loadFromFile("res/wall_texture.png"); // загружаем текатуру стен
-    HERO_TEXTURE.loadFromFile("res/new_hero.png"); // загружаем текстуру героя
-
-    PLATFORM_TEXTURE.setRepeated(true); // чтобы делать спрайты длиннее текстур
-    WALL_TEXTURE.setRepeated(true);
-
-#if ENABLE_SOUNDS
-    SHOOT_SOUND.loadFromFile("res/shoot.wav"); // загружаем музыку
+#if FRAMETIME_LIMIT
+Clock frame_clock; // считают время кадра
 #endif
 
-    FD_FONT.loadFromFile("res/FD.ttf"); // загружаем шрифты
-}
-
 
 #if ENABLE_SOUNDS
+// удвляет не звучащие звуки
 void sound_control() {
+    static Clock clock; // чтобы раз в секунду
+    if (clock.getElapsedTime() < seconds(1)) return;
+
     // удаляем звуки, которые уже не звучат
     for (auto it = background_temp_sounds.begin(); it != background_temp_sounds.end(); ++it)
         if (it->getStatus() != it->Playing)
@@ -53,7 +43,7 @@ void draw_fps() {
 bool show_winner(Winner winner) {
     Text text(string(winner == Winner::PLAYER1 ? "Player1" : "Player2") + " won", FD_FONT, 50);
 
-    text.setPosition(WINDOW_SIZE_X / 3, WINDOW_SIZE_Y / 3);
+    text.setPosition(WINDOW_SIZE_X / 2 - 200, WINDOW_SIZE_Y / 2 - 100);
     text.setFillColor(winner == Winner::PLAYER1 ? Color::Yellow : Color::Red);
 
     window.clear(Color::Green);
@@ -64,13 +54,18 @@ bool show_winner(Winner winner) {
         sleep(milliseconds(25));
 
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-                return false;
-            }
+            switch (event.type) {
+                case Event::Closed:
+                    window.close();
+                    return false;
 
-            if (event.type == event.JoystickButtonPressed) {
-                if (event.joystickButton.button == 0) return true;
+                case Event::JoystickButtonPressed:
+                    if (event.joystickButton.button == 6) {
+                        window.close();
+                        return false;
+                    }
+
+                    if (event.joystickButton.button == 0) return true;
             }
         }
     }
@@ -84,42 +79,62 @@ inline void draw_scene() {
     window.clear(Color::Cyan);
 }
 
-inline void sync() {
-    sleep(milliseconds(1000 / FRAME_LIMIT) - sync_clock.getElapsedTime());
-    sync_clock.restart();
-}
-
 
 int main() {
+    window.setTitle("Game");
+    window.setFramerateLimit(128);
+    window.setMouseCursorVisible(false);
+
     load_texures_and_sounds();
     field.init_walls();
 
     list<Event> controller_events;
     Winner temp_winner;
 
+    sleep(seconds(1));
+
+#if FRAMETIME_LIMIT
+    frame_clock.restart();
+#endif
+
     while (window.isOpen()) {
-        sync();
+#if FRAMETIME_LIMIT
+        if (frame_clock.getElapsedTime() > milliseconds(25)) {
+            cout << "FRAMETIME overhead: " << frame_clock.getElapsedTime().asMilliseconds() << "ms";
+            return -1;
+        }
+        frame_clock.restart();
+#endif
 
+        // обрабатываем события
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) window.close();
+            switch (event.type) {
+                case Event::Closed:
+                    window.close();
+                    return 0;
 
-            if (event.type == Event::JoystickButtonPressed)
-                controller_events.emplace_back(event);
+                case Event::JoystickButtonPressed:
+                    if (event.joystickButton.button == 6) {
+                        window.close();
+                        return 0;
+                    }
+
+                    controller_events.emplace_back(event);
+                    break;
+            }
         }
 
         temp_winner = field.update(controller_events);
+        controller_events.clear();
 
 #if ENABLE_SOUNDS
         sound_control();
 #endif
 
-        controller_events.clear();
-
         if (temp_winner != Winner::NO_ONE) {
             // в течении секунды поле будет изменятся
             Clock tmp;
             while (tmp.getElapsedTime() < seconds(1)) {
-                sync();
                 field.update(controller_events);
                 draw_scene();
             }
@@ -131,6 +146,10 @@ int main() {
 
             field.init_walls();
             field.players_to_position();
+
+#if FRAMETIME_LIMIT
+            frame_clock.restart();
+#endif
         }
 
         draw_scene();

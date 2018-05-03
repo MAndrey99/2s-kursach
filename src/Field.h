@@ -17,7 +17,8 @@ public:
     Field();
 
     void init_walls();
-    void players_to_position();
+    bool intersect_wall(Sprite &sprite);
+    void players_to_position(); // возвращяет игроков на позиции
     void draw_scene(); // рисует все обьекты на поле
     Winner update(list<Event> &events); // обновляет позиции всех обьектов на карте. false -> конец игры
 };

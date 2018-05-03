@@ -15,12 +15,10 @@
 
 #include "config.h"
 
-#define WINDOW_SIZE_X 1500
-#define WINDOW_SIZE_Y 1000
-#define FRAME_LIMIT 58
 #define BULLET_SPEED 2
 #define DRAW_FPS true
 #define ENABLE_SOUNDS true
+#define FRAMETIME_LIMIT false
 
 using namespace std;
 using namespace sf;
@@ -29,10 +27,14 @@ typedef unsigned char nam;
 
 extern RenderWindow window;
 
+extern const unsigned int WINDOW_SIZE_X;
+extern const unsigned int WINDOW_SIZE_Y;
+
 extern Texture WALL_TEXTURE;
 extern Texture PLATFORM_TEXTURE;
 extern Texture BULLET_TEXTURE;
 extern Texture HERO_TEXTURE;
+extern Texture BOX_TEXTURE;
 
 #if ENABLE_SOUNDS
 extern SoundBuffer SHOOT_SOUND;

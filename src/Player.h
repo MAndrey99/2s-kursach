@@ -6,6 +6,7 @@
 
 #define HEALTH_LINE_X_LENGTH 100
 #define HEALTH_LINE_Y_LENGTH 5
+#define HERO_SPEED 3
 
 class Player {
     struct Controller {
@@ -17,7 +18,6 @@ class Player {
         void update(list<Event> &events, vector<Bullet> &bullets);
     } controller;
 
-    float speed = 3.0f;
     float helth = 100;
 
     Sprite sprite;

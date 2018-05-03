@@ -29,8 +29,10 @@ Player::Player(Vector2f position, Color color, nam joysticID, Vector2f direction
 bool Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events) {
     for (int i = 0; i < bullets.size(); i++) {
         if (circleShape.getGlobalBounds().intersects(bullets[i].sprite.getGlobalBounds())) {
-            if (helth > 0)
+            if (helth > 0) {
                 helth -= bullets[i].damage;
+                if (helth < 0) helth = 0;
+            }
             bullets.erase(bullets.begin() + i); // удаляем пулю
         }
     }
@@ -41,7 +43,7 @@ bool Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &e
     auto p = sprite.getPosition();
 
     controller.update(events, bullets);
-    sprite.move(Vector2f(Vector2f(muvement).x * speed, Vector2f(muvement).y * speed));
+    sprite.move(Vector2f(Vector2f(muvement).x * HERO_SPEED, Vector2f(muvement).y * HERO_SPEED));
     circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
     muvement.length = 0; // больше двигаться не надо тк мы передвинулись.
 
@@ -82,7 +84,7 @@ void Player::shoot(vector<Bullet> &bullets) {
         t = Vector2f(-t.x, -t.y);
     t = Muvement(t).get_direction(); // t и owner->direction - ортонормированный базис. t поможет сдвинуть пулю к дулу
 
-    bullets.emplace_back(Bullet(Vector2f(get_position().x + t.x*15, get_position().y + t.y*15), Muvement(direction), 10));
+    bullets.emplace_back(Bullet(Vector2f(get_position().x + t.x*15, get_position().y + t.y*15), Muvement(direction), 30));
     bullets.back().sprite.setRotation(sprite.getRotation());
     bullets.back().sprite.move(direction.x * 75, direction.y * 75);
 }

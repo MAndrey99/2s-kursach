@@ -57,11 +57,29 @@ void Field::init_walls() {
     tmp.setScale(0.5, 0.5);
     tmp.setTextureRect(IntRect(0, 0, WINDOW_SIZE_X*2, WINDOW_SIZE_Y*2));
     tmp.setPosition(0, 0);
-    platform.emplace_back(tmp);
+    platform.emplace_back(tmp); // добавляем фоновую картинку
+
+    // добавляем ящики в рандомные места
+    tmp = Sprite(BOX_TEXTURE);
+    tmp.setPosition(rand() % (WINDOW_SIZE_X - 200) + 100, rand() % (WINDOW_SIZE_Y - 200) + 100);
+    tmp.setScale(0.1, 0.1);
+
+    while (!intersect_wall(tmp) and rand() % (WINDOW_SIZE_X * WINDOW_SIZE_Y / 100)) {
+        walls.emplace_back(tmp);
+        tmp.setPosition(rand() % (WINDOW_SIZE_X - 200) + 100, rand() % (WINDOW_SIZE_Y - 200) + 100);
+    }
 }
 
 
 void Field::players_to_position() {
     player1.to_position(Vector2f(WINDOW_SIZE_X / 12, WINDOW_SIZE_Y / 10), Vector2f(1, 0));
     player2.to_position(Vector2f(WINDOW_SIZE_X - WINDOW_SIZE_X / 12, WINDOW_SIZE_Y - WINDOW_SIZE_Y / 10), Vector2f(-1, 0));
+}
+
+
+bool Field::intersect_wall(Sprite &sprite) {
+    for (Sprite &s : walls)
+        if (sprite.getGlobalBounds().intersects(s.getGlobalBounds()))
+            return true;
+    return false;
 }
