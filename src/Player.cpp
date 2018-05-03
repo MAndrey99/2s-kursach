@@ -3,8 +3,9 @@
 
 #define MIN_STIC_MOVEMENT_TO_MOVE 15.0f
 
-
-Player::Player(Vector2f position, Color color, nam joysticID): sprite(HERO_TEXTURE), controller(this, joysticID), muvement() {
+Player::Player(Vector2f position, Color color, nam joysticID, Vector2f direction): sprite(HERO_TEXTURE),
+                                                                                   controller(this, joysticID),
+                                                                                   muvement() {
     sprite.setTextureRect(IntRect(17, 50, 200, 150));
     sprite.setPosition(position);
     sprite.setScale(0.5, 0.5);
@@ -20,6 +21,8 @@ Player::Player(Vector2f position, Color color, nam joysticID): sprite(HERO_TEXTU
     circleShape.setRadius(30);
     circleShape.setOrigin(15, 15);
     circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
+
+    set_direction(direction);
 }
 
 
@@ -42,9 +45,7 @@ bool Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &e
     circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
     muvement.length = 0; // больше двигаться не надо тк мы передвинулись.
 
-    float new_r = asin(direction.y); // угол в радианах, соответствующий вектору направления
-    if (direction.x < 0) new_r = M_PI - new_r;
-    sprite.setRotation(new_r / M_PI * 180);
+    set_direction(direction);
 
     for (Sprite& i : walls) { // проверяем нет ли пересичений со стенами
         if (i.getGlobalBounds().intersects(circleShape.getGlobalBounds())) {
@@ -75,18 +76,32 @@ bool Player::intersects(const FloatRect &rectangle) {
 }
 
 
-void Player::shoot(Bullet &bullet) {
-    bullet.sprite.setRotation(sprite.getRotation());
-    bullet.sprite.move(direction.x * 75, direction.y * 75);
+void Player::shoot(vector<Bullet> &bullets) {
+    Vector2f t(-direction.y / direction.x, 1);
+    if (direction.x * t.y - direction.y * t.x < 0)
+        t = Vector2f(-t.x, -t.y);
+    t = Muvement(t).get_direction(); // t и owner->direction - ортонормированный базис. t поможет сдвинуть пулю к дулу
+
+    bullets.emplace_back(Bullet(Vector2f(get_position().x + t.x*15, get_position().y + t.y*15), Muvement(direction), 10));
+    bullets.back().sprite.setRotation(sprite.getRotation());
+    bullets.back().sprite.move(direction.x * 75, direction.y * 75);
 }
 
 
-void Player::to_position(Vector2f position) {
+void Player::to_position(Vector2f position, Vector2f direction) {
     helth = 100.0f;
     sprite.setPosition(position);
     circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
-    sprite.setRotation(0);
-    direction = Vector2f(1, 0);
+    set_direction(direction);
+    controller.clock.restart();
+}
+
+
+void Player::set_direction(Vector2f direction) {
+    float new_r = asin(direction.y); // угол в радианах, соответствующий вектору направления
+    if (direction.x < 0) new_r = M_PI - new_r;
+    sprite.setRotation(new_r / M_PI * 180);
+    this->direction = direction;
 }
 
 
@@ -103,9 +118,9 @@ void Player::Controller::update(list<Event> &events, vector<Bullet> &bullets) {
     owner->muvement.add(Vector2f(movement_vector.x * clock.getElapsedTime().asSeconds(), movement_vector.y * clock.getElapsedTime().asSeconds()));
 
     // получаем вектор направления
-    if (squ(Joystick::getAxisPosition(joysticID, Joystick::Axis::U)) + squ(Joystick::getAxisPosition(joysticID, OS == "WINDOWS" ? Joystick::Axis::R : Joystick::Axis::V)) > squ(MIN_STIC_MOVEMENT_TO_MOVE)) {
+    if (squ(Joystick::getAxisPosition(joysticID, Joystick::Axis::U)) + squ(Joystick::getAxisPosition(joysticID, Joystick::Axis::R)) > squ(MIN_STIC_MOVEMENT_TO_MOVE)) {
         owner->direction.x = Joystick::getAxisPosition(joysticID, Joystick::Axis::U);
-        owner->direction.y = Joystick::getAxisPosition(joysticID, OS == "WINDOWS" ? Joystick::Axis::R : Joystick::Axis::V);
+        owner->direction.y = Joystick::getAxisPosition(joysticID, Joystick::Axis::R);
 
         // нормализуем вектор направления
         float len = sqrt(owner->direction.x * owner->direction.x + owner->direction.y * owner->direction.y);
@@ -116,18 +131,16 @@ void Player::Controller::update(list<Event> &events, vector<Bullet> &bullets) {
     clock.restart();
 
 
+    Event::JoystickButtonEvent event;
     // далее обработка клавишь
     for (Event& it : events) {
-        if (it.joystickButton.button == 5 and it.joystickButton.joystickId == joysticID) {
-            Vector2f t(-owner->direction.y / owner->direction.x, 1);
-            if (owner->direction.x * t.y - owner->direction.y * t.x < 0)
-                t = Vector2f(-t.x, -t.y);
-            t = Muvement(t).get_direction(); // t и owner->direction - ортонормированный базис. t поможет сдвинуть пулю к дулу
+        event = it.joystickButton;
+        if (event.joystickId != joysticID) continue;
 
-            Bullet new_bullet(Vector2f(owner->get_position().x + t.x*15, owner->get_position().y + t.y*15), Muvement(owner->direction), 10);
-
-            owner->shoot(new_bullet);
-            bullets.emplace_back(new_bullet);
+        switch (event.button) {
+            case 5:
+                owner->shoot(bullets);
+                break;
         }
     }
 }

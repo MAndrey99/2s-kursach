@@ -5,7 +5,7 @@
 
 Field field;
 Clock sync_clock;
-Event event{};
+Event event;
 
 
 void load_texures_and_sounds() {
@@ -77,8 +77,20 @@ bool show_winner(Winner winner) {
 }
 
 
-int main()
-{
+inline void draw_scene() {
+    field.draw_scene();
+    if constexpr (DRAW_FPS) draw_fps();
+    window.display();
+    window.clear(Color::Cyan);
+}
+
+inline void sync() {
+    sleep(milliseconds(1000 / FRAME_LIMIT) - sync_clock.getElapsedTime());
+    sync_clock.restart();
+}
+
+
+int main() {
     load_texures_and_sounds();
     field.init_walls();
 
@@ -86,8 +98,7 @@ int main()
     Winner temp_winner;
 
     while (window.isOpen()) {
-        sleep(milliseconds(1000 / FRAME_LIMIT) - sync_clock.getElapsedTime());
-        sync_clock.restart();
+        sync();
 
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed) window.close();
@@ -108,13 +119,9 @@ int main()
             // в течении секунды поле будет изменятся
             Clock tmp;
             while (tmp.getElapsedTime() < seconds(1)) {
-                sleep(milliseconds(1000 / FRAME_LIMIT) - sync_clock.getElapsedTime());
-                sync_clock.restart();
+                sync();
                 field.update(controller_events);
-                field.draw_scene();
-                if constexpr (DRAW_FPS) draw_fps();
-                window.display();
-                window.clear(Color::Cyan);
+                draw_scene();
             }
 
             if (!show_winner(temp_winner)) {
@@ -126,10 +133,7 @@ int main()
             field.players_to_position();
         }
 
-        field.draw_scene();
-        if constexpr (DRAW_FPS) draw_fps();
-        window.display();
-        window.clear(Color::Cyan);
+        draw_scene();
     }
 
     return 0;

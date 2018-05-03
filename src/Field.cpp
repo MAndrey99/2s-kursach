@@ -1,8 +1,8 @@
 #include "Field.h"
 
 
-Field::Field(): player1(Vector2f(WINDOW_SIZE_X / 10, WINDOW_SIZE_Y / 10), Color::Yellow, 0),
-                player2(Vector2f(WINDOW_SIZE_X - WINDOW_SIZE_X / 10, WINDOW_SIZE_Y - WINDOW_SIZE_Y / 10), Color::Red, 1)
+Field::Field(): player1(Vector2f(WINDOW_SIZE_X / 12, WINDOW_SIZE_Y / 10), Color::Yellow, 0, Vector2f(1, 0)),
+                player2(Vector2f(WINDOW_SIZE_X - WINDOW_SIZE_X / 12, WINDOW_SIZE_Y - WINDOW_SIZE_Y / 10), Color::Red, 1, Vector2f(-1, 0))
                 {}
 
 
@@ -62,6 +62,6 @@ void Field::init_walls() {
 
 
 void Field::players_to_position() {
-    player1.to_position(Vector2f(WINDOW_SIZE_X / 10, WINDOW_SIZE_Y / 10));
-    player2.to_position(Vector2f(WINDOW_SIZE_X - WINDOW_SIZE_X / 10, WINDOW_SIZE_Y - WINDOW_SIZE_Y / 10));
+    player1.to_position(Vector2f(WINDOW_SIZE_X / 12, WINDOW_SIZE_Y / 10), Vector2f(1, 0));
+    player2.to_position(Vector2f(WINDOW_SIZE_X - WINDOW_SIZE_X / 12, WINDOW_SIZE_Y - WINDOW_SIZE_Y / 10), Vector2f(-1, 0));
 }
