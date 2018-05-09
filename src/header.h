@@ -12,13 +12,15 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Audio.hpp>
 #include <cmath>
+#include <ctime>
 
-#include "config.h"
+#include "Collision.h"
 
-#define BULLET_SPEED 2
+#define BULLET_SPEED 3
 #define DRAW_FPS true
 #define ENABLE_SOUNDS true
 #define FRAMETIME_LIMIT false
+#define BOXES_MIDDLE_COUNT (WINDOW_SIZE_X * WINDOW_SIZE_Y / 10)
 
 using namespace std;
 using namespace sf;
@@ -35,6 +37,7 @@ extern Texture PLATFORM_TEXTURE;
 extern Texture BULLET_TEXTURE;
 extern Texture HERO_TEXTURE;
 extern Texture BOX_TEXTURE;
+extern Texture HERO_CIRCLE_TEXTURE;
 
 #if ENABLE_SOUNDS
 extern SoundBuffer SHOOT_SOUND;

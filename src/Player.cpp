@@ -4,31 +4,34 @@
 #define MIN_STIC_MOVEMENT_TO_MOVE 15.0f
 
 Player::Player(Vector2f position, Color color, nam joysticID, Vector2f direction): sprite(HERO_TEXTURE),
+                                                                                   circle(HERO_CIRCLE_TEXTURE),
                                                                                    controller(this, joysticID),
                                                                                    muvement() {
     sprite.setTextureRect(IntRect(17, 50, 200, 150));
     sprite.setPosition(position);
     sprite.setScale(0.5, 0.5);
     sprite.setColor(color);
-    sprite.setOrigin(57, 72);
+    sprite.setOrigin(57, 74);
 
     health_scale_line.setPosition(sprite.getGlobalBounds().left + 10,
                                     sprite.getGlobalBounds().top + 110);
     health_scale_line.setSize(Vector2f(HEALTH_LINE_X_LENGTH, HEALTH_LINE_Y_LENGTH));
     health_scale_line.setFillColor(Color::Red);
 
-    // кружок используется для обработки столкновений со стенами
-    circleShape.setRadius(30);
-    circleShape.setOrigin(15, 15);
-    circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
-
     set_direction(direction);
+
+    // кружок используется для обработки столкновений со стенами
+    circle.setTextureRect(IntRect(17, 50, 200, 150));
+    circle.setRotation(sprite.getRotation());
+    circle.setPosition(position);
+    circle.setScale(0.5, 0.5);
+    circle.setOrigin(57, 74);
 }
 
 
 bool Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events) {
-    for (int i = 0; i < bullets.size(); i++) {
-        if (circleShape.getGlobalBounds().intersects(bullets[i].sprite.getGlobalBounds())) {
+    for (int i = 0; i < bullets.size(); i++) { // проверяем пересечения с пулями
+        if (Collision::PixelPerfectTest(sprite, bullets[i].sprite)) {
             if (helth > 0) {
                 helth -= bullets[i].damage;
                 if (helth < 0) helth = 0;
@@ -37,44 +40,34 @@ bool Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &e
         }
     }
 
-    if (helth <= 0) return false; // не обрабатываем движения мёртвого игрока
-
-    // сохраняем то что есть сейчас, чтобы откатиться если движение невозможно
-    auto p = sprite.getPosition();
-
+    if (helth == 0) return false; // не обрабатываем движения мёртвого игрока
     controller.update(events, bullets);
-    sprite.move(Vector2f(Vector2f(muvement).x * HERO_SPEED, Vector2f(muvement).y * HERO_SPEED));
-    circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
-    muvement.length = 0; // больше двигаться не надо тк мы передвинулись.
+
+    Vector2f move = muvement.multiplyed(HERO_SPEED);
+    muvement.length = 0;
+
+    if (try_move(move.x, 0, walls)) {
+        try_move(0, move.y, walls);
+    } else {
+        try_move(0, move.y, walls);
+        try_move(move.x, 0, walls);
+    }
 
     set_direction(direction);
-
-    for (Sprite& i : walls) { // проверяем нет ли пересичений со стенами
-        if (i.getGlobalBounds().intersects(circleShape.getGlobalBounds())) {
-            sprite.setPosition(p);
-            circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
-            return true;
-        }
-    }
 
     return true;
 }
 
 
 void Player::auto_drow() {
-//    window.draw(circleShape);
     window.draw(sprite);
+//    window.draw(circle);
 
     health_scale_line.setPosition(sprite.getGlobalBounds().left + 10,
                                   sprite.getGlobalBounds().top + 110);
     health_scale_line.setSize(Vector2f(HEALTH_LINE_X_LENGTH * helth / 100, HEALTH_LINE_Y_LENGTH));
 
     window.draw(health_scale_line);
-}
-
-
-bool Player::intersects(const FloatRect &rectangle) {
-    return circleShape.getGlobalBounds().intersects(rectangle);
 }
 
 
@@ -93,7 +86,7 @@ void Player::shoot(vector<Bullet> &bullets) {
 void Player::to_position(Vector2f position, Vector2f direction) {
     helth = 100.0f;
     sprite.setPosition(position);
-    circleShape.setPosition(sprite.getPosition().x - 15, sprite.getPosition().y - 15);
+    circle.setPosition(sprite.getPosition());
     set_direction(direction);
     controller.clock.restart();
 }
@@ -103,7 +96,23 @@ void Player::set_direction(Vector2f direction) {
     float new_r = asin(direction.y); // угол в радианах, соответствующий вектору направления
     if (direction.x < 0) new_r = M_PI - new_r;
     sprite.setRotation(new_r / M_PI * 180);
+    circle.setRotation(sprite.getRotation());
     this->direction = direction;
+}
+
+bool Player::try_move(float x, float y, list<Sprite> &walls) {
+    auto p = sprite.getPosition(); // сохраняем то что есть сейчас, чтобы откатиться если движение невозможно
+    circle.move(Vector2f(x, y));
+
+    for (Sprite& i : walls) { // проверяем нет ли пересичений со стенами
+        if (Collision::PixelPerfectTest(circle, i)) {
+            circle.setPosition(p);
+            return false;
+        }
+    }
+
+    sprite.setPosition(circle.getPosition());
+    return true;
 }
 
 

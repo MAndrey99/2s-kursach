@@ -80,9 +80,11 @@ inline void draw_scene() {
 }
 
 
-int main() {
+int WinMain() {
+    srand(time(NULL));
+
     window.setTitle("Game");
-    window.setFramerateLimit(128);
+    window.setFramerateLimit(256);
     window.setMouseCursorVisible(false);
 
     load_texures_and_sounds();
@@ -91,7 +93,6 @@ int main() {
     list<Event> controller_events;
     Winner temp_winner;
 
-    sleep(seconds(1));
 
 #if FRAMETIME_LIMIT
     frame_clock.restart();
@@ -106,7 +107,7 @@ int main() {
         frame_clock.restart();
 #endif
 
-        // обрабатываем события
+        // обрабатываем событий
         while (window.pollEvent(event)) {
             switch (event.type) {
                 case Event::Closed:

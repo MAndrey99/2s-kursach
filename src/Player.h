@@ -21,10 +21,11 @@ class Player {
     float helth = 100;
 
     Sprite sprite;
-    CircleShape circleShape; // круг в котором находится сам персонаж. для взаимодействий
+    Sprite circle; // круг в котором находится сам персонаж. для взаимодействий с текстурами
     RectangleShape health_scale_line; // линия здоровья
 
     Vector2f direction; // направление взгляда (нормализованный вектор)
+    bool try_move(float x, float y, list<Sprite> &walls);
 
 public:
     Muvement muvement; // все передвижение сохраняется сдесь. Спрайт двигается после каждого апдейта
@@ -35,7 +36,6 @@ public:
     Vector2f get_position() { return sprite.getPosition(); }
     bool update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events); // false -> персонаж мёртв
     void auto_drow();
-    bool intersects(const Rect<float> &rectangle); // пересикается ли персонаж с другим обьектом
     void shoot(vector<Bullet> &bullets); // сделать выстрел
     void to_position(Vector2f position, Vector2f direction);
     void set_direction(Vector2f direction);

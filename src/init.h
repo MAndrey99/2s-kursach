@@ -10,6 +10,7 @@ Texture PLATFORM_TEXTURE;
 Texture BULLET_TEXTURE;
 Texture HERO_TEXTURE;
 Texture BOX_TEXTURE;
+Texture HERO_CIRCLE_TEXTURE;
 
 #if ENABLE_SOUNDS
 SoundBuffer SHOOT_SOUND;
@@ -21,11 +22,12 @@ list<Sound> background_temp_sounds;
 
 
 void load_texures_and_sounds() {
-    BULLET_TEXTURE.loadFromFile("res/bullet.png"); // загружаем текстуру для пуль
     PLATFORM_TEXTURE.loadFromFile("res/grass.jpg"); // загружаем основную текстуру платформы
-    WALL_TEXTURE.loadFromFile("res/wall_texture.png"); // загружаем текатуру стен
-    HERO_TEXTURE.loadFromFile("res/new_hero.png"); // загружаем текстуру героя
-    BOX_TEXTURE.loadFromFile("res/box.jpg");
+    Collision::CreateTextureAndBitmask(BULLET_TEXTURE, "res/bullet.png"); // загружаем текстуру для пуль
+    Collision::CreateTextureAndBitmask(WALL_TEXTURE, "res/wall_texture.png"); // загружаем текатуру стен
+    Collision::CreateTextureAndBitmask(HERO_TEXTURE, "res/new_hero.png"); // загружаем текстуру героя
+    Collision::CreateTextureAndBitmask(HERO_CIRCLE_TEXTURE, "res/hero_circle.png");
+    Collision::CreateTextureAndBitmask(BOX_TEXTURE, "res/box.jpg");
 
     PLATFORM_TEXTURE.setRepeated(true); // чтобы делать спрайты длиннее текстур
     WALL_TEXTURE.setRepeated(true);
