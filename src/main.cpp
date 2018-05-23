@@ -1,58 +1,55 @@
 #include "header.h"
-#include "init.h"
 #include "Player.h"
 #include "Field.h"
 
 Field field;
 Event event;
-
-#if FRAMETIME_LIMIT
-Clock frame_clock; // считают время кадра
-#endif
+View view(FloatRect(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y));
 
 
-#if ENABLE_SOUNDS
 // удвляет не звучащие звуки
 void sound_control() {
-    static Clock clock; // чтобы раз в секунду
-    if (clock.getElapsedTime() < seconds(1)) return;
-
     // удаляем звуки, которые уже не звучат
     for (auto it = background_temp_sounds.begin(); it != background_temp_sounds.end(); ++it)
         if (it->getStatus() != it->Playing)
             background_temp_sounds.erase(it);
 }
+
+
+inline void load_texures_and_sounds() {
+    PLATFORM_TEXTURE.loadFromFile("res/grass.jpg"); // загружаем основную текстуру платформы
+    Collision::CreateTextureAndBitmask(BULLET_TEXTURE, "res/bullet.png"); // загружаем текстуру для пуль
+    Collision::CreateTextureAndBitmask(WALL_TEXTURE, "res/wall_texture.png"); // загружаем текатуру стен
+    Collision::CreateTextureAndBitmask(HERO_TEXTURE, "res/new_hero.png"); // загружаем текстуру героя
+    Collision::CreateTextureAndBitmask(HERO_CIRCLE_TEXTURE, "res/hero_circle.png");
+    Collision::CreateTextureAndBitmask(BOX_TEXTURE, "res/box.jpg");
+
+    PLATFORM_TEXTURE.setRepeated(true); // чтобы делать спрайты длиннее текстур
+    WALL_TEXTURE.setRepeated(true);
+
+#if ENABLE_SOUNDS
+    SHOOT_SOUND.loadFromFile("res/shoot.wav"); // загружаем музыку
 #endif
 
-
-void draw_fps() {
-    static Clock clock;
-    static int pictures_count;
-    static Text fps_text("FPS: 00", FD_FONT, 20);
-
-    if (clock.getElapsedTime() >= seconds(1)) {
-        fps_text.setString(string("FPS: ") + to_string(pictures_count));
-        pictures_count = 0;
-        clock.restart();
-    } else ++pictures_count;
-
-    window.draw(fps_text);
+    FD_FONT.loadFromFile("res/FD.ttf"); // загружаем шрифты
 }
 
 
+// экран, отображающий победителя
 bool show_winner(Winner winner) {
-    Text text(string(winner == Winner::PLAYER1 ? "Player1" : "Player2") + " won", FD_FONT, 50);
+    Text text(string(winner == Winner::PLAYER1 ? "Player1" : "Player2") + " won", FD_FONT, 50 * zoom);
 
-    text.setPosition(WINDOW_SIZE_X / 2 - 200, WINDOW_SIZE_Y / 2 - 100);
+    text.setPosition(WINDOW_SIZE_X / 2 - 200 * SIZE_X_SCALE, WINDOW_SIZE_Y / 2 - 100 * SIZE_Y_SCALE); // задаём цвет и позицию надписи
     text.setFillColor(winner == Winner::PLAYER1 ? Color::Yellow : Color::Red);
 
-    window.clear(Color::Green);
+    window.clear(Color::Green); // рисуем надпись
     window.draw(text);
     window.display();
 
     while (true) {
         sleep(milliseconds(25));
 
+        // обрабатываем нажатия клавишь
         while (window.pollEvent(event)) {
             switch (event.type) {
                 case Event::Closed:
@@ -60,6 +57,7 @@ bool show_winner(Winner winner) {
                     return false;
 
                 case Event::JoystickButtonPressed:
+                    // клавиша на геймпаде для закрытия игры
                     if (event.joystickButton.button == 6) {
                         window.close();
                         return false;
@@ -73,41 +71,30 @@ bool show_winner(Winner winner) {
 
 
 inline void draw_scene() {
-    field.draw_scene();
-    if constexpr (DRAW_FPS) draw_fps();
-    window.display();
-    window.clear(Color::Cyan);
+    field.draw_scene(); // добавляем обьекты на окно
+
+    window.display(); // отображаем
+    window.clear(Color::Cyan); // чистим обьекты и задаём фон
 }
 
 
 int WinMain() {
-    srand(time(NULL));
+    cout << WINDOW_SIZE_Y << " " << WINDOW_SIZE_X;
+    srand(time(NULL)); // инициализация рандома
 
+    // настраеваем окно
     window.setTitle("Game");
-    window.setFramerateLimit(256);
     window.setMouseCursorVisible(false);
+    window.setView(view);
 
-    load_texures_and_sounds();
-    field.init_walls();
+    load_texures_and_sounds(); // загружаем текстуры и звуки
+    field.init_walls(); // генерируем поле
 
     list<Event> controller_events;
     Winner temp_winner;
 
-
-#if FRAMETIME_LIMIT
-    frame_clock.restart();
-#endif
-
     while (window.isOpen()) {
-#if FRAMETIME_LIMIT
-        if (frame_clock.getElapsedTime() > milliseconds(25)) {
-            cout << "FRAMETIME overhead: " << frame_clock.getElapsedTime().asMilliseconds() << "ms";
-            return -1;
-        }
-        frame_clock.restart();
-#endif
-
-        // обрабатываем событий
+        // обрабатываем событийя
         while (window.pollEvent(event)) {
             switch (event.type) {
                 case Event::Closed:
@@ -122,15 +109,18 @@ int WinMain() {
 
                     controller_events.emplace_back(event);
                     break;
+
+                case Event::KeyPressed:
+                    if (event.key.code == Keyboard::Key::Escape) {
+                        window.close();
+                        return 0;
+                    }
+                    break;
             }
         }
 
-        temp_winner = field.update(controller_events);
+        temp_winner = field.update(controller_events); // обновляем поле, двигаем обьекты
         controller_events.clear();
-
-#if ENABLE_SOUNDS
-        sound_control();
-#endif
 
         if (temp_winner != Winner::NO_ONE) {
             // в течении секунды поле будет изменятся
@@ -145,15 +135,12 @@ int WinMain() {
                 return 0;
             }
 
+            // заново генерируем поле и выставляем персонажей
             field.init_walls();
             field.players_to_position();
-
-#if FRAMETIME_LIMIT
-            frame_clock.restart();
-#endif
         }
 
-        draw_scene();
+        draw_scene(); // выводим кадр на экран
     }
 
     return 0;

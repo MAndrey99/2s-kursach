@@ -13,5 +13,5 @@ public:
     int damage;
 
     Bullet(Vector2f position, Muvement muvement, int damage);
-    void update();
+    void update(); // двигает пулю на поле
 };

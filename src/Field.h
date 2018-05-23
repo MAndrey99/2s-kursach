@@ -16,8 +16,8 @@ class Field {
 public:
     Field();
 
-    void init_walls();
-    bool intersect_wall(Sprite &sprite);
+    void init_walls(); // генерирует рандомное поле
+    bool intersect_wall(Sprite &sprite); // праверяет пересечение со стеной для наклонённых прямоугольников
     void players_to_position(); // возвращяет игроков на позиции
     void draw_scene(); // рисует все обьекты на поле
     Winner update(list<Event> &events); // обновляет позиции всех обьектов на карте. false -> конец игры

@@ -9,12 +9,13 @@
 #define HERO_SPEED 3
 
 class Player {
+    // этот обьект обрабатывает все события. через него идёт управление персонажем
     struct Controller {
-        nam joysticID = 0;
+        int joysticID = 0;
         Player* owner;
         Clock clock;
 
-        Controller(Player*, nam joysticID);
+        Controller(Player*, int joysticID);
         void update(list<Event> &events, vector<Bullet> &bullets);
     } controller;
 
@@ -25,19 +26,19 @@ class Player {
     RectangleShape health_scale_line; // линия здоровья
 
     Vector2f direction; // направление взгляда (нормализованный вектор)
-    bool try_move(float x, float y, list<Sprite> &walls);
+    bool try_move(float x, float y, list<Sprite> &walls); // двигает персонажа если это возможно
 
 public:
     Muvement muvement; // все передвижение сохраняется сдесь. Спрайт двигается после каждого апдейта
 
-    Player(Vector2f position, Color color, nam joysticID, Vector2f direction);
+    Player(Vector2f position, Color color, int joysticID, Vector2f direction);
 
     bool is_alive() { return helth > 0; }
     Vector2f get_position() { return sprite.getPosition(); }
     bool update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events); // false -> персонаж мёртв
-    void auto_drow();
+    void auto_drow(); // добавляет персонажа и его атрибуты в новый кадр
     void shoot(vector<Bullet> &bullets); // сделать выстрел
     void to_position(Vector2f position, Vector2f direction);
-    void set_direction(Vector2f direction);
+    void set_direction(Vector2f direction); // задаёт направление взгляда
 };
 

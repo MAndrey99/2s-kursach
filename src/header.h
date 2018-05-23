@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <list>
+#include <cmath>
+#include <ctime>
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -11,40 +13,41 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Audio.hpp>
-#include <cmath>
-#include <ctime>
 
 #include "Collision.h"
 
-#define BULLET_SPEED 3
-#define DRAW_FPS true
 #define ENABLE_SOUNDS true
-#define FRAMETIME_LIMIT false
-#define BOXES_MIDDLE_COUNT (WINDOW_SIZE_X * WINDOW_SIZE_Y / 10)
+#define GAME_SCALE 0.8f // отвечает за то, во сколько раз будут больше текстуры
+#define SIZE_X_SCALE ((float(WINDOW_SIZE_X) / 1920) * GAME_SCALE)
+#define SIZE_Y_SCALE ((float(WINDOW_SIZE_Y) / 1080) * GAME_SCALE)
 
 using namespace std;
 using namespace sf;
 
 typedef unsigned char nam;
 
-extern RenderWindow window;
+inline RenderWindow window(VideoMode::getDesktopMode(), "Game", Style::Fullscreen);
 
-extern const unsigned int WINDOW_SIZE_X;
-extern const unsigned int WINDOW_SIZE_Y;
+inline constexpr float zoom = 0.5; // отвечает за то, во сколько раз будет считаться разрешение экрана больше
+inline const unsigned int WINDOW_SIZE_X = VideoMode::getDesktopMode().width * zoom;
+inline const unsigned int WINDOW_SIZE_Y = VideoMode::getDesktopMode().height * zoom;
+inline const float BULLET_SPEED = (WINDOW_SIZE_X / 540) * (WINDOW_SIZE_Y / 460) / (2 * SIZE_X_SCALE * SIZE_Y_SCALE);
 
-extern Texture WALL_TEXTURE;
-extern Texture PLATFORM_TEXTURE;
-extern Texture BULLET_TEXTURE;
-extern Texture HERO_TEXTURE;
-extern Texture BOX_TEXTURE;
-extern Texture HERO_CIRCLE_TEXTURE;
+inline Texture WALL_TEXTURE;
+inline Texture PLATFORM_TEXTURE;
+inline Texture BULLET_TEXTURE;
+inline Texture HERO_TEXTURE;
+inline Texture BOX_TEXTURE;
+inline Texture HERO_CIRCLE_TEXTURE;
 
 #if ENABLE_SOUNDS
-extern SoundBuffer SHOOT_SOUND;
+inline SoundBuffer SHOOT_SOUND;
+
+void sound_control();
 #endif
 
-extern Font FD_FONT;
+inline Font FD_FONT;
 
-extern list<Sound> background_temp_sounds;
+inline list<Sound> background_temp_sounds;
 
 #define squ(a) a*a
