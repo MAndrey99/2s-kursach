@@ -8,7 +8,7 @@ set(SFML_STATIC_LIBRARIES TRUE)
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 set(CMAKE_INCLUDE_PATH ${CMAKE_SOURCE_DIR}/src)
-add_executable(Game src/main.cpp src/Player.cpp src/Muvement.cpp src/Field.cpp src/Bullet.cpp)
+add_executable(Game src/main.cpp src/Player.cpp src/Muvement.cpp src/Field.cpp src/Bullet.cpp src/Collision.cpp)
 
 # Подключаем sfml
 set(SFML_DIR "D:/programming/libs/SFML-2.4.2")

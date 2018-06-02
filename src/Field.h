@@ -7,9 +7,9 @@
 
 // Отвечает за расположение обьектов на поле и их взаимодействие.
 class Field {
-    list<Sprite> platform;
     Player player1;
     Player player2;
+    list<Sprite> platform;
     list<Sprite> walls;
     list<Bullet> bullets;
 

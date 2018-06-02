@@ -28,7 +28,7 @@ typedef unsigned char nam;
 
 inline RenderWindow window(VideoMode::getDesktopMode(), "Game", Style::Fullscreen);
 
-inline constexpr float zoom = 0.5; // отвечает за то, во сколько раз будет считаться разрешение экрана больше
+inline constexpr float zoom = 1; // отвечает за то, во сколько раз будет считаться разрешение экрана больше
 inline const unsigned int WINDOW_SIZE_X = VideoMode::getDesktopMode().width * zoom;
 inline const unsigned int WINDOW_SIZE_Y = VideoMode::getDesktopMode().height * zoom;
 inline const float BULLET_SPEED = (WINDOW_SIZE_X / 540) * (WINDOW_SIZE_Y / 460) / (2 * SIZE_X_SCALE * SIZE_Y_SCALE);

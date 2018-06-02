@@ -18,23 +18,27 @@ void Field::draw_scene() {
 
 
 Winner Field::update(list<Event> &events) {
-    for (auto i = bullets.begin(); i != bullets.end(); i++) { // цикл обновления каждой пули
+    bool need_inc = true;
+    for (auto i = bullets.begin(); i != bullets.end();) { // цикл обновления каждой пули
         i->update(); // двигаем пулю
 
         if (i->sprite.getGlobalBounds().top < 0 or i->sprite.getGlobalBounds().top > WINDOW_SIZE_Y
                 or i->sprite.getGlobalBounds().left < 0 or i->sprite.getGlobalBounds().left > WINDOW_SIZE_X) {
-            bullets.erase(i); // удаляем пулю тк она вне поля
-            i--;
+             i = bullets.erase(i); // удаляем пулю тк она вне поля
+             need_inc = false;
         } else for (Sprite &it : walls)
             if (Collision::BoundingBoxTest(i->sprite, it)) {
-                bullets.erase(i); // удаляем пулю тк она в стене
-                i--;
+                i = bullets.erase(i); // удаляем пулю тк она вне поля
+                need_inc = false;
                 break;
             }
+
+        if (need_inc) i++;
+        need_inc = true;
     }
 
-    if (!player1.update(walls, bullets, events)) return Winner::PLAYER2;
-    if (!player2.update(walls, bullets, events)) return Winner::PLAYER1;
+    if (!player1.update(walls, bullets, events, player2)) return Winner::PLAYER2;
+    if (!player2.update(walls, bullets, events, player1)) return Winner::PLAYER1;
     return Winner::NO_ONE;
 }
 
