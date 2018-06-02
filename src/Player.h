@@ -15,7 +15,7 @@
 class Player {
     // этот обьект обрабатывает все события. через него идёт управление персонажем
     struct Controller {
-        int joysticID = 0;
+        int joysticID; // если меньше нуля, то управляет компьютер. до этого было положительное значение
         Player* owner;
         Clock clock;
 

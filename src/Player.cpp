@@ -162,7 +162,7 @@ void Player::Controller::II_update(list<Bullet> &bullets, Player &other) {
 
 
 void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Player &other) {
-    if (joysticID == -1) {
+    if (joysticID < 0) {
         II_update(bullets, other); // передаём управление персонажем функции
         return;
     }
@@ -193,21 +193,27 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
     if (Joystick::isButtonPressed(joysticID, 4))
         owner->look_at({other.get_position().x + 10*GAME_SCALE, other.get_position().y + 10*GAME_SCALE});
 
-    if constexpr (ENABLE_AUTO_SHOOTING) {
-        if (Joystick::isButtonPressed(joysticID, 5))
+    if constexpr (ENABLE_AUTO_SHOOTING) { // автоматическая стрельба!
+        if (Joystick::getAxisPosition(joysticID, Joystick::Axis::Z) > 20)
             owner->shoot(bullets);
-    } else {
-        Event::JoystickButtonEvent event;
-        // далее обработка клавишь
-        for (Event &it : events) {
-            event = it.joystickButton;
-            if (event.joystickId != joysticID) continue;
+    }
 
-            switch (event.button) {
-                case 5:
-                    owner->shoot(bullets);
-                    break;
-            }
+    Event::JoystickButtonEvent event;
+    // далее обработка клавишь
+    for (Event &it : events) {
+        event = it.joystickButton;
+        if (event.joystickId != joysticID) continue;
+
+        switch (event.button) {
+            case 5:
+                owner->shoot(bullets);
+                break;
+
+            case 0:
+                owner->shoot(bullets);
+                joysticID = -joysticID;
+                break;
         }
     }
+
 }
