@@ -11,7 +11,7 @@ class Field {
     Player player1;
     Player player2;
     list<Sprite> walls;
-    vector<Bullet> bullets;
+    list<Bullet> bullets;
 
 public:
     Field();

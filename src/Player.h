@@ -16,7 +16,7 @@ class Player {
         Clock clock;
 
         Controller(Player*, int joysticID);
-        void update(list<Event> &events, vector<Bullet> &bullets);
+        void update(list<Event> &events, list<Bullet> &bullets);
     } controller;
 
     float helth = 100;
@@ -33,12 +33,10 @@ public:
 
     Player(Vector2f position, Color color, int joysticID, Vector2f direction);
 
-    bool is_alive() { return helth > 0; }
     Vector2f get_position() { return sprite.getPosition(); }
-    bool update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events); // false -> персонаж мёртв
+    bool update(list<Sprite> &walls, list<Bullet> &bullets, list<Event> &events); // false -> персонаж мёртв
     void auto_drow(); // добавляет персонажа и его атрибуты в новый кадр
-    void shoot(vector<Bullet> &bullets); // сделать выстрел
+    void shoot(list<Bullet> &bullets); // сделать выстрел
     void to_position(Vector2f position, Vector2f direction);
     void set_direction(Vector2f direction); // задаёт направление взгляда
 };
-

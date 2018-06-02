@@ -72,20 +72,19 @@ bool show_winner(Winner winner) {
 
 inline void draw_scene() {
     field.draw_scene(); // добавляем обьекты на окно
-
     window.display(); // отображаем
     window.clear(Color::Cyan); // чистим обьекты и задаём фон
 }
 
 
 int WinMain() {
-    cout << WINDOW_SIZE_Y << " " << WINDOW_SIZE_X;
     srand(time(NULL)); // инициализация рандома
 
     // настраеваем окно
     window.setTitle("Game");
     window.setMouseCursorVisible(false);
     window.setView(view);
+    window.setVerticalSyncEnabled(true);
 
     load_texures_and_sounds(); // загружаем текстуры и звуки
     field.init_walls(); // генерируем поле

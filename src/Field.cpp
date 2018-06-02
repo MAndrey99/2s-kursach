@@ -18,15 +18,17 @@ void Field::draw_scene() {
 
 
 Winner Field::update(list<Event> &events) {
-    for (int i = 0; i < bullets.size(); i++) { // цикл обновления каждой пули
-        bullets[i].update(); // двигаем пулю
+    for (auto i = bullets.begin(); i != bullets.end(); i++) { // цикл обновления каждой пули
+        i->update(); // двигаем пулю
 
-        if (bullets[i].sprite.getGlobalBounds().top < 0 or bullets[i].sprite.getGlobalBounds().top > WINDOW_SIZE_Y
-                or bullets[i].sprite.getGlobalBounds().left < 0 or bullets[i].sprite.getGlobalBounds().left > WINDOW_SIZE_X) {
-            bullets.erase(bullets.begin() + i); // удаляем пулю тк она в стене или вне поля
+        if (i->sprite.getGlobalBounds().top < 0 or i->sprite.getGlobalBounds().top > WINDOW_SIZE_Y
+                or i->sprite.getGlobalBounds().left < 0 or i->sprite.getGlobalBounds().left > WINDOW_SIZE_X) {
+            bullets.erase(i); // удаляем пулю тк она вне поля
+            i--;
         } else for (Sprite &it : walls)
-            if (Collision::BoundingBoxTest(bullets[i].sprite, it)) {
-                bullets.erase(bullets.begin() + i); // удаляем пулю тк она в стене или вне поля
+            if (Collision::BoundingBoxTest(i->sprite, it)) {
+                bullets.erase(i); // удаляем пулю тк она в стене
+                i--;
                 break;
             }
     }
@@ -67,7 +69,7 @@ void Field::init_walls() {
 
     tmp.setTexture(PLATFORM_TEXTURE);
     tmp.setScale(0.5f * SIZE_X_SCALE / zoom, 0.5f * SIZE_Y_SCALE / zoom);
-    tmp.setTextureRect(IntRect(0, 0, WINDOW_SIZE_X*3, WINDOW_SIZE_Y*3));
+    tmp.setTextureRect(IntRect(0, 0, WINDOW_SIZE_X*3/GAME_SCALE, WINDOW_SIZE_Y*3/GAME_SCALE));
     tmp.setPosition(0, 0);
     platform.emplace_back(tmp); // добавляем фоновую картинку
 

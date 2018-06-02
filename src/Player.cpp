@@ -29,15 +29,16 @@ Player::Player(Vector2f position, Color color, int joysticID, Vector2f direction
 }
 
 
-bool Player::update(list<Sprite> &walls, vector<Bullet> &bullets, list<Event> &events) {
-    for (int i = 0; i < bullets.size(); i++) { // проверяем пересечения с пулями
-        if (sprite.getGlobalBounds().intersects(bullets[i].sprite.getGlobalBounds())
-                and Collision::PixelPerfectTest(sprite, bullets[i].sprite)) {
+bool Player::update(list<Sprite> &walls, list<Bullet> &bullets, list<Event> &events) {
+    for (auto i = bullets.begin(); i != bullets.end(); i++) { // проверяем пересечения с пулями
+        if (sprite.getGlobalBounds().intersects(i->sprite.getGlobalBounds())
+                and Collision::PixelPerfectTest(sprite, i->sprite)) {
             if (helth > 0) {
-                helth -= bullets[i].damage;
+                helth -= i->damage;
                 if (helth < 0) helth = 0;
             }
-            bullets.erase(bullets.begin() + i); // удаляем пулю
+            bullets.erase(i); // удаляем пулю
+            i--;
         }
     }
 
@@ -72,7 +73,7 @@ void Player::auto_drow() {
 }
 
 
-void Player::shoot(vector<Bullet> &bullets) {
+void Player::shoot(list<Bullet> &bullets) {
     Vector2f t(-direction.y / direction.x, 1);
     if (direction.x * t.y - direction.y * t.x < 0)
         t = Vector2f(-t.x, -t.y);
@@ -121,7 +122,18 @@ bool Player::try_move(float x, float y, list<Sprite> &walls) {
 Player::Controller::Controller(Player *owner, int joysticID): owner(owner), joysticID(joysticID) {}
 
 
-void Player::Controller::update(list<Event> &events, vector<Bullet> &bullets) {
+static void II_update(Player &player, list<Bullet> &bullets) {
+
+
+}
+
+
+void Player::Controller::update(list<Event> &events, list<Bullet> &bullets) {
+    if (joysticID == -1) {
+        II_update(*owner, bullets);
+        return;
+    }
+
     // получаем вектор движения
     Vector2f movement_vector(Joystick::getAxisPosition(joysticID, Joystick::Axis::X), Joystick::getAxisPosition(joysticID, Joystick::Axis::Y));
     if (movement_vector.x*movement_vector.x + movement_vector.y*movement_vector.y
