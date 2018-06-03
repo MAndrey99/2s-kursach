@@ -1,6 +1,8 @@
 #include "Player.h"
 #include "II.h"
 
+#define rand_sign() (rand() % 2 == 0 ? 1.f : -1.f)
+
 
 Player::Player(Vector2f position, Color color, int joysticID, Vector2f direction): sprite(HERO_TEXTURE),
                                                                                    circle(HERO_CIRCLE_TEXTURE),
@@ -93,8 +95,10 @@ void Player::shoot(list<Bullet> &bullets) {
     if (direction.x * t.y - direction.y * t.x < 0)
         t = Vector2f(-t.x, -t.y);
     t = Muvement(t).direction; // t и owner->direction - ортонормированный базис. t поможет сдвинуть пулю к дулу
+    float f = rand_sign() * (1 - ACCURACY) * (rand() % 100 + 1) / 100;
 
-    bullets.emplace_back(Bullet({get_position().x + t.x*10*SIZE_X_SCALE, get_position().y + t.y*10*SIZE_Y_SCALE}, Muvement(direction), 30));
+    bullets.emplace_back(Bullet({get_position().x + t.x*10*SIZE_X_SCALE, get_position().y + t.y*10*SIZE_Y_SCALE},
+                                Muvement({direction.x + f * t.x, direction.y + f * t.y}), 30));
     bullets.back().sprite.setRotation(sprite.getRotation());
     bullets.back().sprite.move(direction.x * 85 * SIZE_X_SCALE, direction.y * 85 * SIZE_Y_SCALE);
 }
@@ -134,6 +138,7 @@ bool Player::try_move(float x, float y, list<Sprite> &walls) {
     return true;
 }
 
+
 void Player::look_at(Vector2f vec) {
     float dx = abs(get_position().x - vec.x), dy = abs(get_position().y - vec.y);
     float new_r; // новый угл
@@ -164,8 +169,8 @@ void Player::Controller::II_update(list<Bullet> &bullets, list<Sprite> &walls, P
     II_data &data = joysticID == 0 ? player1_II_data : player2_II_data;
     Vector2f &movement_vector = owner->muvement.direction;
     auto reset_muvement = [&movement_vector, &data] () {
-        float x = (rand() % 2 == 0 ? 1.f : -1.f) / (rand() % 9 + 1);
-        movement_vector = {x, (1 - x) * (rand() % 2 == 0 ? 1.f : -1.f)};
+        float x = rand_sign() / (rand() % 9 + 1);
+        movement_vector = {x, (1 - x) * rand_sign()};
         data.moving_time = seconds(float(rand() % 100) / 30);
         data.moving_cd.restart();
     };

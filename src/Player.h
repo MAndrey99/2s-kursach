@@ -10,6 +10,7 @@
 #define SHOOTING_CD 0.085f
 #define MIN_STIC_MOVEMENT_TO_MOVE 15.0f
 #define ENABLE_AUTO_SHOOTING true
+#define ACCURACY 0.95f
 
 
 class Player {

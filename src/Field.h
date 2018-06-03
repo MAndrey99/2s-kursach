@@ -5,7 +5,7 @@
 #include "Bullet.h"
 #include "enums.h"
 
-#define PLAYER1_II true
+#define PLAYER1_II false
 #define PLAYER2_II true
 
 // Отвечает за расположение обьектов на поле и их взаимодействие.
