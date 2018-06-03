@@ -77,6 +77,15 @@ inline void draw_scene() {
 }
 
 
+void clean_events(list<Event> &events) {
+    for (auto i = events.begin(); i != events.end();)
+        if (i->type != i->JoystickMoved or (i->joystickMove.axis != Joystick::Axis::X and i->joystickMove.axis != Joystick::Axis::Y))
+            i = events.erase(i);
+        else
+            ++i;
+}
+
+
 int WinMain() {
     srand(time(NULL)); // инициализация рандома
 
@@ -122,6 +131,8 @@ int WinMain() {
         controller_events.clear();
 
         if (temp_winner != Winner::NO_ONE) {
+            clean_events(controller_events); // оставляем только связанные с передвижением
+
             // в течении секунды поле будет изменятся
             Clock tmp;
             while (tmp.getElapsedTime() < seconds(1)) {

@@ -15,13 +15,14 @@
 class Player {
     // этот обьект обрабатывает все события. через него идёт управление персонажем
     struct Controller {
+        bool is_II;
         int joysticID; // если меньше нуля, то управляет компьютер. до этого было положительное значение
         Player* owner;
         Clock clock;
 
         Controller(Player*, int joysticID);
         void update(list<Event> &events, list<Bullet> &bullets, Player &other);
-        void II_update(list<Bullet> &bullets, Player &other);
+        void II_update(list<Bullet> &bullets, list<Sprite> &walls, Player &other);
     } controller;
 
     float helth = 100;
@@ -38,12 +39,13 @@ public:
     Muvement muvement; // все передвижение сохраняется сдесь. Спрайт двигается после каждого апдейта
 
     Player(Vector2f position, Color color, int joysticID, Vector2f direction);
+    Player(int joysticID, Color color) : Player({0, 0}, color, joysticID, {0, 1}) {};
 
     Vector2f get_position() { return sprite.getPosition(); }
     bool update(list<Sprite> &walls, list<Bullet> &bullets, list<Event> &events, Player &other); // false -> персонаж мёртв
     void auto_drow(); // добавляет персонажа и его атрибуты в новый кадр
     void shoot(list<Bullet> &bullets); // сделать выстрел
-    void to_position(Vector2f position, Vector2f direction);
+    void to_position(Vector2f position, Vector2f direction, bool is_II);
     void set_direction(Vector2f direction); // задаёт направление взгляда. !!!direction должен быть нормализован
     void look_at(Vector2f vec); // ставит направление взгляда
 };

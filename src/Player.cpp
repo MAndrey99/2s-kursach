@@ -1,5 +1,5 @@
-#include "header.h"
 #include "Player.h"
+#include "II.h"
 
 
 Player::Player(Vector2f position, Color color, int joysticID, Vector2f direction): sprite(HERO_TEXTURE),
@@ -41,21 +41,35 @@ bool Player::update(list<Sprite> &walls, list<Bullet> &bullets, list<Event> &eve
     }
 
     if (helth == 0) return false; // не обрабатываем движения мёртвого игрока
-    controller.update(events, bullets, other);
 
-    Vector2f move = muvement.multiplyed(HERO_SPEED);
-    muvement.length = 0;
+    if (controller.is_II) {
+        for (auto &it : events) {
+            if (it.type == it.JoystickButtonPressed
+                    and it.joystickButton.joystickId == controller.joysticID
+                    and it.joystickButton.button == 0) {
+                muvement.length = 0;
+                controller.is_II = !controller.is_II;
+            }
+        }
 
-    // двигаем персонажа
-    if (try_move(move.x, 0, walls)) {
-        try_move(0, move.y, walls);
+        controller.II_update(bullets, walls, other);
     } else {
-        try_move(0, move.y, walls);
-        try_move(move.x, 0, walls);
+        controller.update(events, bullets, other);
+
+        Vector2f move = muvement.multiplyed(HERO_SPEED);
+        muvement.length = 0;
+
+        // двигаем персонажа
+        if (try_move(move.x, 0, walls)) {
+            try_move(0, move.y, walls);
+        } else {
+            try_move(0, move.y, walls);
+            try_move(move.x, 0, walls);
+        }
+        set_direction(direction);
     }
 
-    set_direction(direction);
-
+    controller.clock.restart();
     return true;
 }
 
@@ -78,20 +92,21 @@ void Player::shoot(list<Bullet> &bullets) {
     Vector2f t(-direction.y / direction.x, 1);
     if (direction.x * t.y - direction.y * t.x < 0)
         t = Vector2f(-t.x, -t.y);
-    t = Muvement(t).get_direction(); // t и owner->direction - ортонормированный базис. t поможет сдвинуть пулю к дулу
+    t = Muvement(t).direction; // t и owner->direction - ортонормированный базис. t поможет сдвинуть пулю к дулу
 
-    bullets.emplace_back(Bullet(Vector2f(get_position().x + t.x*10*SIZE_X_SCALE, get_position().y + t.y*10*SIZE_Y_SCALE), Muvement(direction), 30));
+    bullets.emplace_back(Bullet({get_position().x + t.x*10*SIZE_X_SCALE, get_position().y + t.y*10*SIZE_Y_SCALE}, Muvement(direction), 30));
     bullets.back().sprite.setRotation(sprite.getRotation());
     bullets.back().sprite.move(direction.x * 85 * SIZE_X_SCALE, direction.y * 85 * SIZE_Y_SCALE);
 }
 
 
-void Player::to_position(Vector2f position, Vector2f direction) {
+void Player::to_position(Vector2f position, Vector2f direction, bool is_II = false) {
     helth = 100.0f;
     sprite.setPosition(position);
     circle.setPosition(sprite.getPosition());
     set_direction(direction);
     controller.clock.restart();
+    controller.is_II = is_II;
 }
 
 
@@ -141,32 +156,43 @@ void Player::look_at(Vector2f vec) {
 }
 
 
-Player::Controller::Controller(Player *owner, int joysticID): owner(owner), joysticID(joysticID) {}
+Player::Controller::Controller(Player *owner, int joysticID): owner(owner), joysticID(abs(joysticID)), is_II(joysticID < 0) {}
 
 
-void Player::Controller::II_update(list<Bullet> &bullets, Player &other) {
+void Player::Controller::II_update(list<Bullet> &bullets, list<Sprite> &walls, Player &other) {
     // получаем вектор движения
-    Vector2f movement_vector;
-    // TODO: обработать
+    II_data &data = joysticID == 0 ? player1_II_data : player2_II_data;
+    Vector2f &movement_vector = owner->muvement.direction;
+    auto reset_muvement = [&movement_vector, &data] () {
+        float x = (rand() % 2 == 0 ? 1.f : -1.f) / (rand() % 9 + 1);
+        movement_vector = {x, (1 - x) * (rand() % 2 == 0 ? 1.f : -1.f)};
+        data.moving_time = seconds(float(rand() % 100) / 30);
+        data.moving_cd.restart();
+    };
+
+    if (data.moving_cd.getElapsedTime() < data.moving_time) {
+        if (not owner->try_move(movement_vector.x * HERO_SPEED * clock.getElapsedTime().asMilliseconds() / 10,
+                                movement_vector.y * HERO_SPEED * clock.getElapsedTime().asMilliseconds() / 10,
+                                walls)) {
+            reset_muvement();
+        }
+    } else {
+        reset_muvement();
+    }
 
     // двигаем персоонажа
-    owner->muvement.add(Vector2f(movement_vector.x * clock.getElapsedTime().asSeconds(), movement_vector.y * clock.getElapsedTime().asSeconds()));
+    owner->muvement.add({movement_vector.x * clock.getElapsedTime().asSeconds(), movement_vector.y * clock.getElapsedTime().asSeconds()});
 
-    // получаем вектор направления{
+    // получаем вектор направления
     owner->look_at(other.get_position());
 
-    clock.restart();
-
-    throw "TODO";
+    // делаем выстрел если противник на линии огня
+    if (is_inline(owner->get_position(), other.get_position(), walls))
+        owner->shoot(bullets);
 }
 
 
 void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Player &other) {
-    if (joysticID < 0) {
-        II_update(bullets, other); // передаём управление персонажем функции
-        return;
-    }
-
     // получаем вектор движения
     Vector2f movement_vector(Joystick::getAxisPosition(joysticID, Joystick::Axis::X), Joystick::getAxisPosition(joysticID, Joystick::Axis::Y));
     if (movement_vector.x*movement_vector.x + movement_vector.y*movement_vector.y
@@ -174,7 +200,7 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
         movement_vector = Vector2f(0, 0);
 
     // двигаем персоонажа
-    owner->muvement.add(Vector2f(movement_vector.x * clock.getElapsedTime().asSeconds(), movement_vector.y * clock.getElapsedTime().asSeconds()));
+    owner->muvement.add({movement_vector.x * clock.getElapsedTime().asSeconds(), movement_vector.y * clock.getElapsedTime().asSeconds()});
 
     // получаем вектор направления
     if (squ(Joystick::getAxisPosition(joysticID, Joystick::Axis::U))
@@ -187,8 +213,6 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
         owner->direction.x /= len;
         owner->direction.y /= len;
     }
-
-    clock.restart();
 
     if (Joystick::isButtonPressed(joysticID, 4))
         owner->look_at({other.get_position().x + 10*GAME_SCALE, other.get_position().y + 10*GAME_SCALE});
@@ -210,7 +234,7 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
                 break;
 
             case 0:
-                joysticID = -joysticID;
+                is_II = !is_II;
                 break;
         }
     }

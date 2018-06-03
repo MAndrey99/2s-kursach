@@ -2,10 +2,9 @@
 #include "Collision.h"
 
 
-Field::Field(): player1(Vector2f(WINDOW_SIZE_X / 12 * SIZE_X_SCALE / zoom, WINDOW_SIZE_Y / 10 * SIZE_Y_SCALE / zoom), Color::Yellow, 0, Vector2f(1, 0)),
-                player2(Vector2f(WINDOW_SIZE_X - WINDOW_SIZE_X * SIZE_X_SCALE / 12 / zoom,
-                                 WINDOW_SIZE_Y - WINDOW_SIZE_Y * SIZE_Y_SCALE / 10 / zoom), Color::Red, 1, Vector2f(-1, 0))
-                {}
+Field::Field() : player1(0, Color::Blue), player2(1, Color::Red) {
+    players_to_position();
+}
 
 
 void Field::draw_scene() {
@@ -94,9 +93,11 @@ void Field::init_walls() {
 
 
 void Field::players_to_position() {
-    player1.to_position(Vector2f(WINDOW_SIZE_X / 12 * SIZE_X_SCALE / zoom, WINDOW_SIZE_Y / 10 * SIZE_Y_SCALE / zoom), Vector2f(1, 0));
+    player1.to_position(Vector2f(WINDOW_SIZE_X / 12 * SIZE_X_SCALE / zoom, WINDOW_SIZE_Y / 10 * SIZE_Y_SCALE / zoom),
+                        Vector2f(1, 0), PLAYER1_II);
     player2.to_position(Vector2f(WINDOW_SIZE_X - WINDOW_SIZE_X * SIZE_X_SCALE / 12 / zoom,
-                                 WINDOW_SIZE_Y - WINDOW_SIZE_Y * SIZE_Y_SCALE / 10 / zoom), Vector2f(-1, 0));
+                                 WINDOW_SIZE_Y - WINDOW_SIZE_Y * SIZE_Y_SCALE / 10 / zoom),
+                        Vector2f(-1, 0), PLAYER2_II);
 }
 
 

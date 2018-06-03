@@ -11,7 +11,8 @@ set(CMAKE_INCLUDE_PATH ${CMAKE_SOURCE_DIR}/src)
 add_executable(Game src/main.cpp src/Player.cpp src/Muvement.cpp src/Field.cpp src/Bullet.cpp src/Collision.cpp)
 
 # Подключаем sfml
-set(SFML_DIR "D:/programming/libs/SFML-2.4.2")
+set(SFML_DIR "D:/programming/libs/SFML-2.5.0")
+set(SFML_ROOT ${SFML_DIR})
 set(CMAKE_MODULE_PATH "${SFML_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 find_package(SFML 2 REQUIRED audio graphics window system)
 include_directories(${SFML_INCLUDE_DIR})
