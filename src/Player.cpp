@@ -37,6 +37,7 @@ bool Player::update(list<Sprite> &walls, list<Bullet> &bullets, list<Event> &eve
             if (helth > 0) {
                 helth -= i->damage;
                 if (helth < 0) helth = 0;
+                (controller.joysticID == 0 ? player1_II_data : player2_II_data).last_damage.restart();
             }
             i = bullets.erase(i); // удаляем пулю
         } else i++;
@@ -178,9 +179,8 @@ void Player::Controller::II_update(list<Bullet> &bullets, list<Sprite> &walls, P
     if (data.moving_cd.getElapsedTime() < data.moving_time) {
         if (not owner->try_move(movement_vector.x * HERO_SPEED * clock.getElapsedTime().asMilliseconds() / 10,
                                 movement_vector.y * HERO_SPEED * clock.getElapsedTime().asMilliseconds() / 10,
-                                walls)) {
+                                walls))
             reset_muvement();
-        }
     } else {
         reset_muvement();
     }
@@ -194,6 +194,11 @@ void Player::Controller::II_update(list<Bullet> &bullets, list<Sprite> &walls, P
     // делаем выстрел если противник на линии огня
     if (is_inline(owner->get_position(), other.get_position(), walls))
         owner->shoot(bullets);
+
+    // регеним жизни
+    if (owner->helth < 100 and data.last_damage.getElapsedTime() > seconds(3)) {
+        owner->helth += clock.getElapsedTime().asSeconds() * 5;
+    }
 }
 
 
@@ -219,29 +224,35 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
         owner->direction.y /= len;
     }
 
-    if (Joystick::isButtonPressed(joysticID, 4))
-        owner->look_at({other.get_position().x + 10*GAME_SCALE, other.get_position().y + 10*GAME_SCALE});
+    if (Joystick::isButtonPressed(joysticID, 2) and owner->helth < 100) {
+        owner->helth += clock.getElapsedTime().asSeconds() * 7;
+        owner->muvement = Muvement(owner->muvement.multiplyed(0.4));
+    } else {
+        Event::JoystickButtonEvent event;
+        // далее обработка клавишь
+        for (Event &it : events) {
+            if (it.type != Event::JoystickButtonPressed) continue;
 
-    if constexpr (ENABLE_AUTO_SHOOTING) { // автоматическая стрельба!
-        if (Joystick::getAxisPosition(joysticID, Joystick::Axis::Z) > 20)
-            owner->shoot(bullets);
-    }
+            event = it.joystickButton;
+            if (event.joystickId != joysticID) continue;
 
-    Event::JoystickButtonEvent event;
-    // далее обработка клавишь
-    for (Event &it : events) {
-        event = it.joystickButton;
-        if (event.joystickId != joysticID) continue;
+            switch (event.button) {
+                case 5:
+                    owner->shoot(bullets);
+                    break;
 
-        switch (event.button) {
-            case 5:
+                case 0:
+                    is_II = !is_II;
+                    break;
+            }
+        }
+
+        if (Joystick::isButtonPressed(joysticID, 4))
+            owner->look_at({other.get_position().x + 10 * GAME_SCALE, other.get_position().y + 10 * GAME_SCALE});
+
+        if constexpr (ENABLE_AUTO_SHOOTING) { // автоматическая стрельба!
+            if (Joystick::getAxisPosition(joysticID, Joystick::Axis::Z) > 20)
                 owner->shoot(bullets);
-                break;
-
-            case 0:
-                is_II = !is_II;
-                break;
         }
     }
-
 }

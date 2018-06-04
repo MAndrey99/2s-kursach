@@ -2,6 +2,7 @@
 
 struct II_data {
     Clock moving_cd;
+    Clock last_damage;
     Time moving_time = seconds(0);
 } player1_II_data, player2_II_data;
 

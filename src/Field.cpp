@@ -2,9 +2,7 @@
 #include "Collision.h"
 
 
-Field::Field() : player1(0, Color::Blue), player2(1, Color::Red) {
-    players_to_position();
-}
+Field::Field() : player1(0, Color::Blue), player2(1, Color::Red) {}
 
 
 void Field::draw_scene() {

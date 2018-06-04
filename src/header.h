@@ -51,3 +51,7 @@ inline Font FD_FONT;
 inline list<Sound> background_temp_sounds;
 
 #define squ(a) a*a
+
+
+inline constexpr bool PLAYER1_II = false;
+inline bool PLAYER2_II = false;
