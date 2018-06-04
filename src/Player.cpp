@@ -8,6 +8,12 @@ Player::Player(Vector2f position, Color color, int joysticID, Vector2f direction
                                                                                    circle(HERO_CIRCLE_TEXTURE),
                                                                                    controller(this, joysticID),
                                                                                    muvement() {
+    reload_sound.setBuffer(RELOAD_SOUND);
+    bullets_count.setFillColor(Color::Black);
+    bullets_count.setFont(FD_FONT);
+    bullets_count.setCharacterSize(17.f * zoom * GAME_SCALE);
+
+
     sprite.setTextureRect(IntRect(17, 50, 200, 150));
     sprite.setPosition(position);
     sprite.setScale(0.5 * SIZE_X_SCALE, 0.5 * SIZE_Y_SCALE);
@@ -84,13 +90,20 @@ void Player::auto_drow() {
     health_scale_line.setPosition(sprite.getGlobalBounds().left + 10 * SIZE_X_SCALE,
                                   sprite.getGlobalBounds().top + 110 * SIZE_Y_SCALE);
     health_scale_line.setSize(Vector2f(HEALTH_LINE_X_LENGTH * SIZE_X_SCALE * helth / 100, HEALTH_LINE_Y_LENGTH * SIZE_Y_SCALE));
+    bullets_count.setPosition(health_scale_line.getPosition().x,
+                              health_scale_line.getPosition().y + health_scale_line.getGlobalBounds().height * 2);
+    bullets_count.setString(to_string(bullets));
+
     window.draw(health_scale_line);
+    window.draw(bullets_count);
 }
 
 
 void Player::shoot(list<Bullet> &bullets) {
     if (shoot_cd.getElapsedTime().asSeconds() < SHOOTING_CD) return;
     else shoot_cd.restart();
+
+    if (reload_sound.getStatus() == Sound::Playing or this->bullets == 0) return;
 
     Vector2f t(-direction.y / direction.x, 1);
     if (direction.x * t.y - direction.y * t.x < 0)
@@ -102,11 +115,14 @@ void Player::shoot(list<Bullet> &bullets) {
                                 Muvement({direction.x + f * t.x, direction.y + f * t.y}), 30));
     bullets.back().sprite.setRotation(sprite.getRotation());
     bullets.back().sprite.move(direction.x * 85 * SIZE_X_SCALE, direction.y * 85 * SIZE_Y_SCALE);
+
+    this->bullets--;
 }
 
 
 void Player::to_position(Vector2f position, Vector2f direction, bool is_II = false) {
     helth = 100.0f;
+    bullets = MAX_BULLETS_COUNT;
     sprite.setPosition(position);
     circle.setPosition(sprite.getPosition());
     set_direction(direction);
@@ -162,6 +178,12 @@ void Player::look_at(Vector2f vec) {
 }
 
 
+inline void Player::reload() {
+    bullets = MAX_BULLETS_COUNT;
+    reload_sound.play();
+}
+
+
 Player::Controller::Controller(Player *owner, int joysticID): owner(owner), joysticID(abs(joysticID)), is_II(joysticID < 0) {}
 
 
@@ -170,8 +192,8 @@ void Player::Controller::II_update(list<Bullet> &bullets, list<Sprite> &walls, P
     II_data &data = joysticID == 0 ? player1_II_data : player2_II_data;
     Vector2f &movement_vector = owner->muvement.direction;
     auto reset_muvement = [&movement_vector, &data] () {
-        float x = rand_sign() / (rand() % 9 + 1);
-        movement_vector = {x, (1 - x) * rand_sign()};
+        float x = float(rand() % 101) / 100;
+        movement_vector = {rand_sign() * x, (1 - x) * rand_sign()};
         data.moving_time = seconds(float(rand() % 100) / 30);
         data.moving_cd.restart();
     };
@@ -185,9 +207,6 @@ void Player::Controller::II_update(list<Bullet> &bullets, list<Sprite> &walls, P
         reset_muvement();
     }
 
-    // двигаем персоонажа
-    owner->muvement.add({movement_vector.x * clock.getElapsedTime().asSeconds(), movement_vector.y * clock.getElapsedTime().asSeconds()});
-
     // получаем вектор направления
     owner->look_at(other.get_position());
 
@@ -199,6 +218,9 @@ void Player::Controller::II_update(list<Bullet> &bullets, list<Sprite> &walls, P
     if (owner->helth < 100 and data.last_damage.getElapsedTime() > seconds(3)) {
         owner->helth += clock.getElapsedTime().asSeconds() * 5;
     }
+
+    // перезарядка если надо
+    if (owner->bullets == 0) owner->reload();
 }
 
 
@@ -238,7 +260,11 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
 
             switch (event.button) {
                 case 5:
-                    owner->shoot(bullets);
+                    if (owner->reload_sound.getStatus() != Sound::Playing) owner->shoot(bullets);
+                    break;
+
+                case 3:
+                    if (owner->reload_sound.getStatus() == Sound::Stopped) owner->reload();
                     break;
 
                 case 0:
@@ -251,7 +277,7 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
             owner->look_at({other.get_position().x + 10 * GAME_SCALE, other.get_position().y + 10 * GAME_SCALE});
 
         if constexpr (ENABLE_AUTO_SHOOTING) { // автоматическая стрельба!
-            if (Joystick::getAxisPosition(joysticID, Joystick::Axis::Z) > 20)
+            if (Joystick::getAxisPosition(joysticID, Joystick::Axis::Z) > 20 and owner->reload_sound.getStatus() != Sound::Playing)
                 owner->shoot(bullets);
         }
     }

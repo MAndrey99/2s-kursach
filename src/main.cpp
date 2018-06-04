@@ -27,9 +27,9 @@ inline void load_texures_and_sounds() {
     PLATFORM_TEXTURE.setRepeated(true); // чтобы делать спрайты длиннее текстур
     WALL_TEXTURE.setRepeated(true);
 
-#if ENABLE_SOUNDS
-    SHOOT_SOUND.loadFromFile("res/shoot.wav"); // загружаем музыку
-#endif
+    // загружаем звуки
+    SHOOT_SOUND.loadFromFile("res/shoot.wav");
+    RELOAD_SOUND.loadFromFile("res/reload.wav");
 
     FD_FONT.loadFromFile("res/FD.ttf"); // загружаем шрифты
 }

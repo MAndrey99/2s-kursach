@@ -16,7 +16,6 @@
 
 #include "Collision.h"
 
-#define ENABLE_SOUNDS true
 #define GAME_SCALE 0.8f // отвечает за то, во сколько раз будут больше текстуры
 #define SIZE_X_SCALE ((float(WINDOW_SIZE_X) / 1920) * GAME_SCALE)
 #define SIZE_Y_SCALE ((float(WINDOW_SIZE_Y) / 1080) * GAME_SCALE)
@@ -40,11 +39,10 @@ inline Texture HERO_TEXTURE;
 inline Texture BOX_TEXTURE;
 inline Texture HERO_CIRCLE_TEXTURE;
 
-#if ENABLE_SOUNDS
 inline SoundBuffer SHOOT_SOUND;
+inline SoundBuffer RELOAD_SOUND;
 
 void sound_control();
-#endif
 
 inline Font FD_FONT;
 

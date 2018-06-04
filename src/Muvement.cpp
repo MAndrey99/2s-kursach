@@ -20,7 +20,7 @@ Muvement::operator Vector2f() {
 
 void Muvement::add(sf::Vector2f arg) {
     arg = v_sum(arg);
-    length = sqrt(arg.x*arg.x + arg.y*arg.y); // длинна нового вектора
+    length = sqrt(squ(arg.x) + squ(arg.y)); // длинна нового вектора
 
     if (length != 0) {
         direction.x = arg.x / length;
