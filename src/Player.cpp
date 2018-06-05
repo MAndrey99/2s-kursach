@@ -253,8 +253,11 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
         owner->helth += clock.getElapsedTime().asSeconds() * 7;
         owner->muvement = Muvement(owner->muvement.multiplyed(0.4));
     } else {
-        Event::JoystickButtonEvent event;
+        if (Joystick::isButtonPressed(joysticID, 4))
+            owner->look_at({other.get_position().x + 10 * GAME_SCALE, other.get_position().y + 10 * GAME_SCALE});
+
         // далее обработка клавишь
+        Event::JoystickButtonEvent event;
         for (Event &it : events) {
             if (it.type != Event::JoystickButtonPressed) continue;
 
@@ -275,9 +278,6 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
                     break;
             }
         }
-
-        if (Joystick::isButtonPressed(joysticID, 4))
-            owner->look_at({other.get_position().x + 10 * GAME_SCALE, other.get_position().y + 10 * GAME_SCALE});
 
         if constexpr (ENABLE_AUTO_SHOOTING) { // автоматическая стрельба!
             if (Joystick::getAxisPosition(joysticID, Joystick::Axis::Z) > 20 and owner->reload_sound.getStatus() != Sound::Playing)

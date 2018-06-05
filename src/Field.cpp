@@ -7,8 +7,8 @@ Field::Field() : player1(0, Color::Blue), player2(1, Color::Red) {}
 
 void Field::draw_scene() {
     for (Sprite& i : platform) window.draw(i); // рисуем платформу
-    for (Bullet& i : bullets) window.draw(i.sprite); // рисуем пули
     for (Sprite& i : walls) window.draw(i); // рисуем стены
+    for (Bullet& i : bullets) window.draw(i.sprite); // рисуем пули
     player1.auto_drow(); // рисуем игроков
     player2.auto_drow();
 }
