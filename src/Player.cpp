@@ -9,7 +9,7 @@ Player::Player(Vector2f position, Color color, int joysticID, Vector2f direction
                                                                                    controller(this, joysticID),
                                                                                    muvement() {
     reload_sound.setBuffer(RELOAD_SOUND);
-    bullets_count.setFillColor(Color::Black);
+    bullets_count.setFillColor(Color(100, 50, 40));
     bullets_count.setFont(FD_FONT);
     bullets_count.setCharacterSize(17.f * zoom * GAME_SCALE);
 
@@ -55,7 +55,7 @@ bool Player::update(list<Sprite> &walls, list<Bullet> &bullets, list<Event> &eve
         for (auto &it : events) {
             if (it.type == it.JoystickButtonPressed
                     and it.joystickButton.joystickId == controller.joysticID
-                    and it.joystickButton.button == 0) {
+                    and it.joystickButton.button == 1) {
                 muvement.length = 0;
                 controller.is_II = !controller.is_II;
             }
@@ -89,17 +89,20 @@ void Player::auto_drow() {
 
     health_scale_line.setPosition(sprite.getGlobalBounds().left + 10 * SIZE_X_SCALE,
                                   sprite.getGlobalBounds().top + 110 * SIZE_Y_SCALE);
-    health_scale_line.setSize(Vector2f(HEALTH_LINE_X_LENGTH * SIZE_X_SCALE * helth / 100, HEALTH_LINE_Y_LENGTH * SIZE_Y_SCALE));
+    health_scale_line.setSize(Vector2f(HEALTH_LINE_X_LENGTH * SIZE_X_SCALE * helth / 100,
+                                       HEALTH_LINE_Y_LENGTH * SIZE_Y_SCALE));
+
     bullets_count.setPosition(health_scale_line.getPosition().x,
                               health_scale_line.getPosition().y + health_scale_line.getGlobalBounds().height * 2);
-    bullets_count.setString(to_string(bullets));
+
+    bullets_count.setString(reload_sound.getStatus() == Sound::Playing ? "Reloading" : to_string(bullets));
 
     window.draw(health_scale_line);
     window.draw(bullets_count);
 }
 
 
-void Player::shoot(list<Bullet> &bullets) {
+void Player::shoot(list<Bullet> &bullets, float additional_accuracy = 0) {
     if (shoot_cd.getElapsedTime().asSeconds() < SHOOTING_CD) return;
     else shoot_cd.restart();
 
@@ -109,10 +112,10 @@ void Player::shoot(list<Bullet> &bullets) {
     if (direction.x * t.y - direction.y * t.x < 0)
         t = Vector2f(-t.x, -t.y);
     t = Muvement(t).direction; // t и owner->direction - ортонормированный базис. t поможет сдвинуть пулю к дулу
-    float f = rand_sign() * (1 - ACCURACY) * (rand() % 100 + 1) / 100;
+    float f = rand_sign() * (1 - ACCURACY - additional_accuracy) * (rand() % 100 + 1) / 100;
 
     bullets.emplace_back(Bullet({get_position().x + t.x*10*SIZE_X_SCALE, get_position().y + t.y*10*SIZE_Y_SCALE},
-                                Muvement({direction.x + f * t.x, direction.y + f * t.y}), 30));
+                                Muvement({direction.x + f * t.x, direction.y + f * t.y}), 25));
     bullets.back().sprite.setRotation(sprite.getRotation());
     bullets.back().sprite.move(direction.x * 85 * SIZE_X_SCALE, direction.y * 85 * SIZE_Y_SCALE);
 
@@ -247,6 +250,7 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
     }
 
     if (Joystick::isButtonPressed(joysticID, 2) and owner->helth < 100) {
+        // восстановление hp
         owner->helth += clock.getElapsedTime().asSeconds() * 7;
         owner->muvement = Muvement(owner->muvement.multiplyed(0.4));
     } else {
@@ -260,14 +264,14 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
 
             switch (event.button) {
                 case 5:
-                    if (owner->reload_sound.getStatus() != Sound::Playing) owner->shoot(bullets);
+                    if (owner->reload_sound.getStatus() != Sound::Playing) owner->shoot(bullets, 0.03f);
                     break;
 
                 case 3:
                     if (owner->reload_sound.getStatus() == Sound::Stopped) owner->reload();
                     break;
 
-                case 0:
+                case 1:
                     is_II = !is_II;
                     break;
             }
