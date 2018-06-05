@@ -13,7 +13,6 @@ Player::Player(Vector2f position, Color color, int joysticID, Vector2f direction
     bullets_count.setFont(FD_FONT);
     bullets_count.setCharacterSize(17.f * zoom * GAME_SCALE);
 
-
     sprite.setTextureRect(IntRect(17, 50, 200, 150));
     sprite.setPosition(position);
     sprite.setScale(0.5 * SIZE_X_SCALE, 0.5 * SIZE_Y_SCALE);
@@ -239,9 +238,9 @@ void Player::Controller::update(list<Event> &events, list<Bullet> &bullets, Play
 
     // получаем вектор направления
     if (squ(Joystick::getAxisPosition(joysticID, Joystick::Axis::U))
-        + squ(Joystick::getAxisPosition(joysticID, Joystick::Axis::R)) > squ(MIN_STIC_MOVEMENT_TO_MOVE)) {
+        + squ(Joystick::getAxisPosition(joysticID, Joystick::Axis::V)) > squ(MIN_STIC_MOVEMENT_TO_MOVE)) {
         owner->direction.x = Joystick::getAxisPosition(joysticID, Joystick::Axis::U);
-        owner->direction.y = Joystick::getAxisPosition(joysticID, Joystick::Axis::R);
+        owner->direction.y = Joystick::getAxisPosition(joysticID, Joystick::Axis::V);
 
         // нормализуем вектор направления
         float len = sqrt(owner->direction.x * owner->direction.x + owner->direction.y * owner->direction.y);
